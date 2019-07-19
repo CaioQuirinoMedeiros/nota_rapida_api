@@ -11,7 +11,7 @@ const studentSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  slug: {
+  unique_registration: {
     type: String,
     unique: true
   },
@@ -24,7 +24,9 @@ const studentSchema = new mongoose.Schema({
 studentSchema.pre("save", async function(next) {
   const student = this;
 
-  student.slug = (Math.random() * 10000).toString();
+  student.unique_registration = `${student.team.toString()}.${
+    student.registration
+  }`;
 
   next();
 });

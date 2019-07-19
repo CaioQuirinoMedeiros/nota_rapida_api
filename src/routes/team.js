@@ -3,7 +3,7 @@ const router = new express.Router()
 const auth = require("../app/middlewares/auth")
 const TeamController = require("../app/controllers/TeamController")
 
-router.post("/teams", auth, TeamController.store)
+router.post("/teams", TeamController.store)
 
 router.get("/teams", TeamController.index)
 

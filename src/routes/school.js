@@ -3,7 +3,7 @@ const router = new express.Router()
 const auth = require("../app/middlewares/auth")
 const SchoolController = require("../app/controllers/SchoolController")
 
-router.post("/schools", auth, SchoolController.store)
+router.post("/schools", SchoolController.store)
 
 router.get("/schools", SchoolController.index)
 

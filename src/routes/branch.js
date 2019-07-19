@@ -3,7 +3,7 @@ const router = new express.Router()
 const auth = require("../app/middlewares/auth")
 const BranchController = require("../app/controllers/BranchController")
 
-router.post("/branches", auth, BranchController.store)
+router.post("/branches", BranchController.store)
 
 router.get("/branches", BranchController.index)
 

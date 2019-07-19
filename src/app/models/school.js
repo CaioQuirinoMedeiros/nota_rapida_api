@@ -18,6 +18,12 @@ schoolSchema.virtual("branches", {
   foreignField: "school"
 })
 
+schoolSchema.virtual("tests", {
+  ref: "Test",
+  localField: "_id",
+  foreignField: "school"
+})
+
 const School = mongoose.model("School", schoolSchema)
 
 module.exports = School

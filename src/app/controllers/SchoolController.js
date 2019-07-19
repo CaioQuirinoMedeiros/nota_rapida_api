@@ -1,53 +1,53 @@
-const School = require("../models/School");
+const School = require("../models/School")
 
 class SchoolController {
   async store(req, res) {
-    const { name } = req.body;
-    const school = new School({ name });
+    const { name } = req.body
+    const school = new School({ name })
 
     try {
-      await school.save();
+      await school.save()
 
-      return res.status(201).send(school);
+      return res.status(201).send(school)
     } catch (err) {
-      console.log(err);
+      console.log(err)
       return res
         .status(err.status || 400)
-        .send({ error: "Não foi possível criar o colégio" });
+        .send({ error: "Não foi possível criar o colégio" })
     }
   }
 
   async index(req, res) {
     try {
-      const schools = await School.find();
+      const schools = await School.find()
 
-      return res.status(200).send(schools);
+      return res.status(200).send(schools)
     } catch (err) {
-      console.log(err);
+      console.log(err)
       return res
         .status(err.status || 400)
-        .send({ error: "Erro ao buscar os colégios" });
+        .send({ error: "Erro ao buscar os colégios" })
     }
   }
   async show(req, res) {
-    const { id } = req.params;
+    const { id } = req.params
     try {
-      const school = await School.findById(id);
+      const school = await School.findById(id)
 
       if (!school) {
-        return res.status(404).send({ error: "Colégio não encontrado" });
+        return res.status(404).send({ error: "Colégio não encontrado" })
       }
 
-      await school.populate("branches").execPopulate();
+      await school.populate("branches").execPopulate()
 
-      return res.status(200).send(school);
+      return res.status(200).send(school)
     } catch (err) {
-      console.log(err);
+      console.log(err)
       return res
         .status(err.status || 400)
-        .send({ error: "Erro ao buscar as unidades" });
+        .send({ error: "Erro ao buscar as unidades" })
     }
   }
 }
 
-module.exports = new SchoolController();
+module.exports = new SchoolController()

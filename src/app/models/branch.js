@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
 const branchSchema = new mongoose.Schema({
   name: {
@@ -10,8 +10,8 @@ const branchSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "School"
   }
-});
+})
 
-const Branch = mongoose.model("Branch", branchSchema);
+const Branch = mongoose.model("Branch", branchSchema)
 
-module.exports = Branch;
+module.exports = Branch

@@ -1,12 +1,12 @@
-const express = require("express");
-const router = new express.Router();
-const auth = require("../app/middlewares/auth");
-const BranchController = require("../app/controllers/BranchController");
+const express = require("express")
+const router = new express.Router()
+const auth = require("../app/middlewares/auth")
+const BranchController = require("../app/controllers/BranchController")
 
-router.post("/branches", auth, BranchController.store);
+router.post("/branches", auth, BranchController.store)
 
-router.get("/branches", BranchController.index);
+router.get("/branches", BranchController.index)
 
-router.get("/branches/:id", BranchController.show);
+router.get("/branches/:id", BranchController.show)
 
-module.exports = router;
+module.exports = router

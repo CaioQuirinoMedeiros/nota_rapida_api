@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
 const studentSchema = new mongoose.Schema({
   name: {
@@ -19,18 +19,18 @@ const studentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Team"
   }
-});
+})
 
 studentSchema.pre("save", async function(next) {
-  const student = this;
+  const student = this
 
   student.unique_registration = `${student.team.toString()}.${
     student.registration
-  }`;
+  }`
 
-  next();
-});
+  next()
+})
 
-const Student = mongoose.model("Student", studentSchema);
+const Student = mongoose.model("Student", studentSchema)
 
-module.exports = Student;
+module.exports = Student

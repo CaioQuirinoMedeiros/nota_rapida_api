@@ -1,55 +1,53 @@
-const Team = require("../models/Team");
+const Team = require("../models/Team")
 
 class TeamController {
   async store(req, res) {
-    const { name, branch } = req.body;
-    const team = new Team({ name, branch });
+    const { name, branch } = req.body
+    const team = new Team({ name, branch })
 
     try {
-      await team.save();
+      await team.save()
 
-      return res.status(201).send(team);
+      return res.status(201).send(team)
     } catch (err) {
-      console.log(err);
+      console.log(err)
       return res
         .status(err.status || 400)
-        .send({ error: "Não foi possível criar a turma" });
+        .send({ error: "Não foi possível criar a turma" })
     }
   }
 
   async index(req, res) {
     try {
-      const teams = await Team.find();
+      const teams = await Team.find()
 
-      return res.status(200).send(teams);
+      return res.status(200).send(teams)
     } catch (err) {
-      console.log(err);
+      console.log(err)
       return res
         .status(err.status || 400)
-        .send({ error: "Erro ao buscar as turmas" });
+        .send({ error: "Erro ao buscar as turmas" })
     }
   }
   async show(req, res) {
-    const { id } = req.params;
+    const { id } = req.params
     try {
-      const team = await Team.findById(id);
+      const team = await Team.findById(id)
 
       if (!team) {
-        return res.status(404).send({ error: "Turma não encontrada" });
+        return res.status(404).send({ error: "Turma não encontrada" })
       }
 
-      await team
-        .populate({ path: "branch", populate: "school" })
-        .execPopulate();
+      await team.populate({ path: "branch", populate: "school" }).execPopulate()
 
-      return res.status(200).send(team);
+      return res.status(200).send(team)
     } catch (err) {
-      console.log(err);
+      console.log(err)
       return res
         .status(err.status || 400)
-        .send({ error: "Erro ao buscar as turmas" });
+        .send({ error: "Erro ao buscar as turmas" })
     }
   }
 }
 
-module.exports = new TeamController();
+module.exports = new TeamController()

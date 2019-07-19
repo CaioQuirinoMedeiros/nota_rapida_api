@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
 const schoolSchema = new mongoose.Schema(
   {
@@ -10,14 +10,14 @@ const schoolSchema = new mongoose.Schema(
     }
   },
   { toJSON: { virtuals: true } }
-);
+)
 
 schoolSchema.virtual("branches", {
   ref: "Branch",
   localField: "_id",
   foreignField: "school"
-});
+})
 
-const School = mongoose.model("School", schoolSchema);
+const School = mongoose.model("School", schoolSchema)
 
-module.exports = School;
+module.exports = School

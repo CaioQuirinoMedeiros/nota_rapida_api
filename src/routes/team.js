@@ -1,12 +1,12 @@
-const express = require("express");
-const router = new express.Router();
-const auth = require("../app/middlewares/auth");
-const TeamController = require("../app/controllers/TeamController");
+const express = require("express")
+const router = new express.Router()
+const auth = require("../app/middlewares/auth")
+const TeamController = require("../app/controllers/TeamController")
 
-router.post("/teams", auth, TeamController.store);
+router.post("/teams", auth, TeamController.store)
 
-router.get("/teams", TeamController.index);
+router.get("/teams", TeamController.index)
 
-router.get("/teams/:id", TeamController.show);
+router.get("/teams/:id", TeamController.show)
 
-module.exports = router;
+module.exports = router

@@ -38,7 +38,10 @@ class SchoolController {
         return res.status(404).send({ error: "Colégio não encontrado" })
       }
 
-      await school.populate("branches").execPopulate()
+      await school
+        .populate("branches")
+        .populate("tests", "name date")
+        .execPopulate()
 
       return res.status(200).send(school)
     } catch (err) {

@@ -1,14 +1,14 @@
-const Test = require("../models/test")
+const Exam = require("../models/exam")
 
-class TestController {
+class ExamController {
   async store(req, res) {
     const { name, school, date, questions } = req.body
-    const test = new Test({ name, school, date, questions })
+    const exam = new Exam({ name, school, date, questions })
 
     try {
-      await test.save()
+      await exam.save()
 
-      return res.status(201).send(test)
+      return res.status(201).send(exam)
     } catch (err) {
       console.log(err)
       return res
@@ -19,9 +19,9 @@ class TestController {
 
   async index(req, res) {
     try {
-      const tests = await Test.find()
+      const exams = await Exam.find()
 
-      return res.status(200).send(tests)
+      return res.status(200).send(exams)
     } catch (err) {
       console.log(err)
       return res
@@ -32,15 +32,15 @@ class TestController {
   async show(req, res) {
     const { id } = req.params
     try {
-      const test = await Test.findById(id)
+      const exam = await Exam.findById(id)
 
-      if (!test) {
+      if (!exam) {
         return res.status(404).send({ error: "Prova não encontrada" })
       }
 
-      await test.populate("school").execPopulate()
+      await exam.populate("school").execPopulate()
 
-      return res.status(200).send(test)
+      return res.status(200).send(exam)
     } catch (err) {
       console.log(err)
       return res
@@ -50,4 +50,4 @@ class TestController {
   }
 }
 
-module.exports = new TestController()
+module.exports = new ExamController()

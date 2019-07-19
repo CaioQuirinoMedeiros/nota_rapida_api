@@ -18,8 +18,8 @@ schoolSchema.virtual("branches", {
   foreignField: "school"
 })
 
-schoolSchema.virtual("tests", {
-  ref: "Test",
+schoolSchema.virtual("exams", {
+  ref: "Exam",
   localField: "_id",
   foreignField: "school"
 })

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = new express.Router();
 const auth = require("../app/middlewares/auth");
-const TeamController = require("../app/controllers/team");
+const TeamController = require("../app/controllers/TeamController");
 
 router.post("/teams", auth, TeamController.store);
 

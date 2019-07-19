@@ -70,13 +70,13 @@ userSchema.statics.findByCredentials = async (email, password) => {
   const user = await User.findOne({ email });
 
   if (!user) {
-    throw new Error("This email is not registered");
+    throw new Error("Email não registrado");
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
 
   if (!isMatch) {
-    throw new Error("Invalid password");
+    throw new Error("Senha inválida");
   }
 
   return user;
@@ -85,7 +85,7 @@ userSchema.statics.findByCredentials = async (email, password) => {
 userSchema.methods.generateAuthToken = async function() {
   const user = this;
 
-  const token = jwt.sign({ id: user._id.toString() }, "caioquirinomedeiros");
+  const token = jwt.sign({ id: user._id.toString() }, process.env.JWT_SECRET);
 
   user.tokens = user.tokens.concat({ token });
 

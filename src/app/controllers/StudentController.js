@@ -1,4 +1,4 @@
-const Student = require("../models/student");
+const Student = require("../models/Student");
 
 class StudentController {
   async store(req, res) {

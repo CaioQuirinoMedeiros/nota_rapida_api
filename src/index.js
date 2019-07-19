@@ -2,12 +2,12 @@ const express = require("express");
 require("./config/database/mongoose");
 require("dotenv").config();
 
-const authRouter = require("./routers/auth");
-const userRouter = require("./routers/user");
-const schoolRouter = require("./routers/school");
-const branchRouter = require("./routers/branch");
-const teamRouter = require("./routers/team");
-const studentRouter = require("./routers/student");
+const authRouter = require("./routes/auth");
+const userRouter = require("./routes/user");
+const schoolRouter = require("./routes/school");
+const branchRouter = require("./routes/branch");
+const teamRouter = require("./routes/team");
+const studentRouter = require("./routes/student");
 
 const app = express();
 

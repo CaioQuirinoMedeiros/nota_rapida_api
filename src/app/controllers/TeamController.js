@@ -1,4 +1,4 @@
-const Team = require("../app/models/team");
+const Team = require("../models/Team");
 
 class TeamController {
   async store(req, res) {
@@ -33,6 +33,10 @@ class TeamController {
     const { id } = req.params;
     try {
       const team = await Team.findById(id);
+
+      if (!team) {
+        return res.status(404).send({ error: "Turma não encontrada" });
+      }
 
       await team
         .populate({ path: "branch", populate: "school" })

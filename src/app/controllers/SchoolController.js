@@ -1,4 +1,4 @@
-const School = require("../app/models/school");
+const School = require("../models/School");
 
 class SchoolController {
   async store(req, res) {
@@ -33,6 +33,10 @@ class SchoolController {
     const { id } = req.params;
     try {
       const school = await School.findById(id);
+
+      if (!school) {
+        return res.status(404).send({ error: "Colégio não encontrado" });
+      }
 
       await school.populate("branches").execPopulate();
 

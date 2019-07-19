@@ -1,7 +1,7 @@
 const express = require("express");
 const router = new express.Router();
 const auth = require("../app/middlewares/auth");
-const SchoolController = require("../app/controllers/school");
+const SchoolController = require("../app/controllers/SchoolController");
 
 router.post("/schools", auth, SchoolController.store);
 

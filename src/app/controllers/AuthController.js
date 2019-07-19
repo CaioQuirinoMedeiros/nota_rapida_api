@@ -1,4 +1,4 @@
-const User = require("../app/models/user");
+const User = require("../models/user");
 
 class AuthController {
   async register(req, res) {

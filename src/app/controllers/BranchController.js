@@ -1,4 +1,4 @@
-const Branch = require("../app/models/branch");
+const Branch = require("../models/Branch");
 
 class BranchController {
   async store(req, res) {
@@ -34,6 +34,10 @@ class BranchController {
     const { id } = req.params;
     try {
       const branch = await Branch.findById(id);
+
+      if (!branch) {
+        return res.status(404).send({ error: "Unidade não encontrada" });
+      }
 
       await branch.populate("school").execPopulate();
 

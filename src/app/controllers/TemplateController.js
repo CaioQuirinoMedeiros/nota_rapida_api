@@ -2,8 +2,8 @@ const Template = require("../models/Template")
 
 class TemplateController {
   async store(req, res) {
-    const { name, types } = req.body
-    const template = new Template({ name, types })
+    const { name, sections, categories } = req.body
+    const template = new Template({ name, sections, categories })
 
     try {
       await template.save()

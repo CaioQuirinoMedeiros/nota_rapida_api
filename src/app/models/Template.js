@@ -1,9 +1,27 @@
 const mongoose = require("mongoose")
 
-const typeSchema = new mongoose.Schema({
-  name: String,
-  correct: Number,
-  incorrect: Number
+const categorySchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  correct: {
+    type: Number,
+    required: true
+  },
+  incorrect: {
+    type: Number,
+    required: true
+  }
+})
+
+const sectionSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  }
 })
 
 const templateSchema = new mongoose.Schema({
@@ -12,7 +30,8 @@ const templateSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  types: [typeSchema]
+  categories: [categorySchema],
+  sections: [sectionSchema]
 })
 
 const Template = mongoose.model("Template", templateSchema)

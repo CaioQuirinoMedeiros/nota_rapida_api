@@ -28,7 +28,7 @@ studentSchema.pre("save", async function(next) {
     student.registration
   }`
 
-  next()
+  return next()
 })
 
 const Student = mongoose.model("Student", studentSchema)

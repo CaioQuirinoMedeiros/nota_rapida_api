@@ -2,8 +2,15 @@ const Exam = require("../models/exam")
 
 class ExamController {
   async store(req, res) {
-    const { name, school, template, date, questions } = req.body
-    const exam = new Exam({ name, school, template, date, questions })
+    const { name, date, parameter, school, template, questions } = req.body
+    const exam = new Exam({
+      name,
+      date,
+      parameter,
+      school,
+      template,
+      questions
+    })
 
     try {
       await exam.save()

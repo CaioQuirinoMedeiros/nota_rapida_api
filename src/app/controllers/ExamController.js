@@ -2,8 +2,8 @@ const Exam = require("../models/exam")
 
 class ExamController {
   async store(req, res) {
-    const { name, school, date, questions } = req.body
-    const exam = new Exam({ name, school, date, questions })
+    const { name, school, template, date, questions } = req.body
+    const exam = new Exam({ name, school, template, date, questions })
 
     try {
       await exam.save()
@@ -29,6 +29,7 @@ class ExamController {
         .send({ error: "Erro ao buscar as provas" })
     }
   }
+
   async show(req, res) {
     const { id } = req.params
     try {
@@ -38,7 +39,10 @@ class ExamController {
         return res.status(404).send({ error: "Prova não encontrada" })
       }
 
-      await exam.populate("school").execPopulate()
+      await exam
+        .populate("school", "name")
+        .populate("template", "name")
+        .execPopulate()
 
       return res.status(200).send(exam)
     } catch (err) {

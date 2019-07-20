@@ -2,11 +2,7 @@ const mongoose = require("mongoose")
 
 const questionSchema = new mongoose.Schema({
   number: Number,
-  category: {
-    type: String,
-    enum: ["A", "B", "C", "D"]
-  },
-  value: Number,
+  category: String,
   response: String
 })
 
@@ -20,6 +16,11 @@ const examSchema = new mongoose.Schema(
     school: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "School",
+      required: true
+    },
+    template: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Template",
       required: true
     },
     date: {

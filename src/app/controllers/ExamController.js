@@ -42,6 +42,8 @@ class ExamController {
       await exam
         .populate("school", "name")
         .populate("template", "name")
+        .populate("tests", "student")
+        .populate("numTests")
         .execPopulate()
 
       return res.status(200).send(exam)

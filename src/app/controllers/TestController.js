@@ -44,6 +44,7 @@ class TestController {
         .populate("exam", "name date")
         .execPopulate()
 
+      console.log(test.markeds)
       return res.status(200).send(test)
     } catch (err) {
       console.log(err)

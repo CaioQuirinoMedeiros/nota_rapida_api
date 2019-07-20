@@ -1,7 +1,7 @@
 const mongoose = require("mongoose")
 
 const questionSchema = new mongoose.Schema({
-  number: Number,
+  number: { type: Number, required: true },
   category: String,
   response: String
 })
@@ -32,9 +32,23 @@ const examSchema = new mongoose.Schema(
     timestamps: {
       createdAt: "created_at",
       updatedAt: "updated_at"
-    }
+    },
+    toJSON: { virtuals: true }
   }
 )
+
+examSchema.virtual("tests", {
+  ref: "Test",
+  localField: "_id",
+  foreignField: "exam"
+})
+
+examSchema.virtual("numTests", {
+  ref: "Test",
+  localField: "_id",
+  foreignField: "exam",
+  count: true
+})
 
 const Exam = mongoose.model("Exam", examSchema)
 

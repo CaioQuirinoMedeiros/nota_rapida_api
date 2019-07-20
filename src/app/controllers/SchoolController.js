@@ -40,7 +40,7 @@ class SchoolController {
 
       await school
         .populate("branches")
-        .populate("tests", "name date")
+        .populate("exams", "name date")
         .execPopulate()
 
       return res.status(200).send(school)

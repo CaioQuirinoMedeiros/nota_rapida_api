@@ -15,6 +15,11 @@ const studentSchema = new mongoose.Schema({
     type: String,
     unique: true
   },
+  school: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "School",
+    required: true
+  },
   team: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Team"

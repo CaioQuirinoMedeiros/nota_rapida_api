@@ -9,4 +9,8 @@ router.get("/branches", BranchController.index)
 
 router.get("/branches/:id", BranchController.show)
 
+router.put("/branches/:id", BranchController.update)
+
+router.delete("/branches/:id", BranchController.destroy)
+
 module.exports = router

@@ -61,12 +61,16 @@ class SchoolController {
     try {
       const school = await School.findByIdAndUpdate(id, { name }, { new: true })
 
+      if (!school) {
+        return res.status(404).send({ error: "Colégio não encontrado" })
+      }
+
       return res.status(200).send(school)
     } catch (err) {
       console.log(err)
       return res
         .status(err.status || 400)
-        .send({ error: "Não foi possível editar a escola" })
+        .send({ error: "Não foi possível editar o colégio" })
     }
   }
 
@@ -74,7 +78,11 @@ class SchoolController {
     const { id } = req.params
 
     try {
-      await School.findByIdAndDelete(id)
+      const school = await School.findByIdAndDelete(id)
+
+      if (!school) {
+        return res.status(404).send({ error: "Colégio não encontrado" })
+      }
 
       return res.status(200).send()
     } catch (err) {

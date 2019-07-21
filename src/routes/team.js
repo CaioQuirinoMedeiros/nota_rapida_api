@@ -9,4 +9,8 @@ router.get("/teams", TeamController.index)
 
 router.get("/teams/:id", TeamController.show)
 
+router.put("/teams/:id", TeamController.update)
+
+router.delete("/teams/:id", TeamController.destroy)
+
 module.exports = router

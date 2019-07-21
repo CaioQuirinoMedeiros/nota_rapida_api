@@ -49,7 +49,7 @@ class ExamController {
       await exam
         .populate("school", "name")
         .populate("template", "name")
-        .populate("tests", "student")
+        .populate("tests")
         .populate("numTests")
         .execPopulate()
 

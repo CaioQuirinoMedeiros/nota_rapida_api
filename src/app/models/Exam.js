@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 const Template = require("./Template")
-const autopopulte = require("mongoose-autopopulate")
+const autopopulate = require("mongoose-autopopulate")
 
 const questionSchema = new mongoose.Schema(
   {
@@ -16,7 +16,7 @@ const questionSchema = new mongoose.Schema(
       correct: Number,
       incorrect: Number
     },
-    response: String
+    response: { type: String, default: null }
   },
   { toJSON: { virtuals: true } }
 )
@@ -41,6 +41,14 @@ questionSchema.virtual("value").get(function() {
   }
 })
 
+questionSchema.virtual("percentages").get(function() {
+  const exam = this.parent()
+
+  console.log(exam)
+
+  return "oi"
+})
+
 const examSchema = new mongoose.Schema(
   {
     name: {
@@ -60,8 +68,7 @@ const examSchema = new mongoose.Schema(
     template: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Template",
-      required: true,
-      autopopulate: true
+      required: true
     },
     questions: [questionSchema]
   },
@@ -74,7 +81,7 @@ const examSchema = new mongoose.Schema(
   }
 )
 
-examSchema.plugin(autopopulte)
+examSchema.plugin(autopopulate)
 
 examSchema.virtual("tests", {
   ref: "Test",

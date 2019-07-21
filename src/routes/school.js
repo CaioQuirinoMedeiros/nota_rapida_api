@@ -9,4 +9,8 @@ router.get("/schools", SchoolController.index)
 
 router.get("/schools/:id", SchoolController.show)
 
+router.put("/schools/:id", SchoolController.update)
+
+router.delete("/schools/:id", SchoolController.destroy)
+
 module.exports = router

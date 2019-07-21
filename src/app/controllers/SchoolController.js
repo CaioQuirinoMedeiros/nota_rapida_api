@@ -29,12 +29,14 @@ class SchoolController {
         .send({ error: "Erro ao buscar os colégios" })
     }
   }
+
   async show(req, res) {
     const { id } = req.params
     try {
       const school = await School.findById(id)
 
       if (!school) {
+        console.log("OPA")
         return res.status(404).send({ error: "Colégio não encontrado" })
       }
 
@@ -48,7 +50,38 @@ class SchoolController {
       console.log(err)
       return res
         .status(err.status || 400)
-        .send({ error: "Erro ao buscar as unidades" })
+        .send({ error: "Erro ao buscar o colégio" })
+    }
+  }
+
+  async update(req, res) {
+    const { id } = req.params
+    const { name } = req.body
+
+    try {
+      const school = await School.findByIdAndUpdate(id, { name }, { new: true })
+
+      return res.status(200).send(school)
+    } catch (err) {
+      console.log(err)
+      return res
+        .status(err.status || 400)
+        .send({ error: "Não foi possível editar a escola" })
+    }
+  }
+
+  async destroy(req, res) {
+    const { id } = req.params
+
+    try {
+      await School.findByIdAndDelete(id)
+
+      return res.status(200).send()
+    } catch (err) {
+      console.log(err)
+      return res
+        .status(err.status || 400)
+        .send({ error: "Não foi possível deletar o colégio" })
     }
   }
 }

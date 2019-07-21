@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+const School = require("./School")
 
 const branchSchema = new mongoose.Schema(
   {
@@ -15,6 +16,10 @@ const branchSchema = new mongoose.Schema(
   },
   { toJSON: { virtuals: true } }
 )
+
+branchSchema
+  .path("school")
+  .validate(async value => await School.findById(value))
 
 branchSchema.virtual("teams", {
   ref: "Team",

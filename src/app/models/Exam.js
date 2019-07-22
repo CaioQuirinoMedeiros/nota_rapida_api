@@ -1,6 +1,5 @@
 const mongoose = require("mongoose")
 const Template = require("./Template")
-const autopopulate = require("mongoose-autopopulate")
 
 const questionSchema = new mongoose.Schema(
   {
@@ -60,9 +59,9 @@ const examSchema = new mongoose.Schema(
       type: Date
     },
     parameter: Number,
-    school: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "School",
+      ref: "User",
       required: true
     },
     template: {
@@ -80,8 +79,6 @@ const examSchema = new mongoose.Schema(
     toJSON: { virtuals: true }
   }
 )
-
-examSchema.plugin(autopopulate)
 
 examSchema.virtual("tests", {
   ref: "Test",

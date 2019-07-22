@@ -2,12 +2,14 @@ const Exam = require("../models/exam")
 
 class ExamController {
   async store(req, res) {
-    const { name, date, parameter, school, template, questions } = req.body
+    const { name, date, parameter, template, questions } = req.body
+    const { user } = req
+
     const exam = new Exam({
       name,
       date,
       parameter,
-      school,
+      user,
       template,
       questions
     })
@@ -47,7 +49,7 @@ class ExamController {
       }
 
       await exam
-        .populate("school", "name")
+        .populate("user", "name")
         .populate("template", "name")
         .populate("tests")
         .populate("numTests")

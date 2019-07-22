@@ -1,6 +1,5 @@
 const express = require("express")
 const router = new express.Router()
-const auth = require("../app/middlewares/auth")
 const BranchController = require("../app/controllers/BranchController")
 
 router.post("/branches", BranchController.store)

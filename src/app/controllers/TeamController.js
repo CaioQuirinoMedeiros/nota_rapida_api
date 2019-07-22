@@ -19,11 +19,11 @@ class TeamController {
   }
 
   async index(req, res) {
-    const { school } = req.body
+    const { user } = req
+
     try {
-      const branches = await Branch.find({ school })
-      console.log(branches)
-      const teams = await Team.find({ branch: { $in: branches } })
+      await user.populate("branches").execPopulate()
+      const teams = await Team.find({ branch: { $in: user.branches } })
 
       return res.status(200).send(teams)
     } catch (err) {
@@ -35,15 +35,21 @@ class TeamController {
   }
 
   async show(req, res) {
-    const { id } = req.params
+    const { id: _id } = req.params
+    const { user } = req
+
     try {
-      const team = await Team.findById(id)
+      await user.populate("branches").execPopulate()
+      const team = await Team.findOne({ _id, branch: { $in: user.branches } })
 
       if (!team) {
         return res.status(404).send({ error: "Turma não encontrada" })
       }
 
-      await team.populate({ path: "branch", populate: "school" }).execPopulate()
+      await team
+        .populate("branch")
+        .populate("students")
+        .execPopulate()
 
       return res.status(200).send(team)
     } catch (err) {
@@ -55,11 +61,17 @@ class TeamController {
   }
 
   async update(req, res) {
-    const { id } = req.params
+    const { id: _id } = req.params
     const { name } = req.body
+    const { user } = req
 
     try {
-      const team = await Team.findByIdAndUpdate(id, { name }, { new: true })
+      await user.populate("branches").execPopulate()
+      const team = await Team.findOneAndUpdate(
+        { _id, branch: { $in: user.branches } },
+        { name },
+        { new: true, runValidators: true }
+      )
 
       if (!team) {
         return res.status(404).send({ error: "Turma não encontrada" })
@@ -75,10 +87,15 @@ class TeamController {
   }
 
   async destroy(req, res) {
-    const { id } = req.params
+    const { id: _id } = req.params
+    const { user } = req
 
     try {
-      const team = await Team.findByIdAndDelete(id)
+      await user.populate("branches").execPopulate()
+      const team = await Team.findOneAndDelete({
+        _id,
+        branch: { $in: user.branches }
+      })
 
       if (!team) {
         return res.status(404).send({ error: "Turma não encontrada" })

@@ -1,12 +1,12 @@
 const Branch = require("../models/Branch")
-const School = require("../models/School")
 
 class BranchController {
   async store(req, res) {
-    const { name, school } = req.body
+    const { name } = req.body
+    const { user } = req
 
     try {
-      const branch = new Branch({ name, school })
+      const branch = new Branch({ name, user: user._id })
 
       await branch.save()
 
@@ -20,16 +20,12 @@ class BranchController {
   }
 
   async index(req, res) {
-    const { school: id } = req.body
+    const { user } = req
 
     try {
-      const school = await School.findById(id).populate("branches")
+      await user.populate("branches").execPopulate()
 
-      if (!school) {
-        return res.status(404).send({ error: "Colégio não encontrado" })
-      }
-
-      return res.status(200).send(school.branches)
+      return res.status(200).send(user.branches)
     } catch (err) {
       console.log(err)
       return res
@@ -39,10 +35,11 @@ class BranchController {
   }
 
   async show(req, res) {
-    const { id } = req.params
+    const { id: _id } = req.params
+    const { user } = req
     try {
-      const branch = await Branch.findById(id)
-        .populate("school")
+      const branch = await Branch.findOne({ _id, user: user._id })
+        .populate("user", "name")
         .populate("teams")
 
       if (!branch) {
@@ -59,11 +56,16 @@ class BranchController {
   }
 
   async update(req, res) {
-    const { id } = req.params
+    const { id: _id } = req.params
     const { name } = req.body
+    const { user } = req
 
     try {
-      const branch = await Branch.findByIdAndUpdate(id, { name }, { new: true })
+      const branch = await Branch.findOneAndUpdate(
+        { _id, user: user._id },
+        { name },
+        { new: true, runValidators: true }
+      )
 
       if (!branch) {
         return res.status(404).send({ error: "Unidade não encontrada" })
@@ -79,10 +81,11 @@ class BranchController {
   }
 
   async destroy(req, res) {
-    const { id } = req.params
+    const { id: _id } = req.params
+    const { user } = req
 
     try {
-      const branch = await Branch.findByIdAndDelete(id)
+      const branch = await Branch.findOneAndDelete({ _id, user: user._id })
 
       if (!branch) {
         return res.status(404).send({ error: "Unidade não encontrada" })

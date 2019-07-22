@@ -3,43 +3,58 @@ const validator = require("validator")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    lowercase: true,
-    validate(value) {
-      if (!validator.isEmail(value)) {
-        throw new Error("Email is invalid")
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Email is invalid")
+        }
       }
-    }
-  },
-  password: {
-    type: String,
-    required: true,
-    minlength: 7,
-    trim: true,
-    validate(value) {
-      if (value === "password") {
-        throw new Error("Your password cannot be 'password'")
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 7,
+      trim: true,
+      validate(value) {
+        if (value === "password") {
+          throw new Error("Your password cannot be 'password'")
+        }
       }
-    }
-  },
-  tokens: [
-    {
-      token: {
-        type: String,
-        required: true
+    },
+    tokens: [
+      {
+        token: {
+          type: String,
+          required: true
+        }
       }
-    }
-  ]
+    ]
+  },
+  { toJSON: { virtuals: true } }
+)
+
+userSchema.virtual("branches", {
+  ref: "Branch",
+  localField: "_id",
+  foreignField: "user"
+})
+
+userSchema.virtual("exams", {
+  ref: "Exam",
+  localField: "_id",
+  foreignField: "user"
 })
 
 userSchema.pre("save", async function(next) {
@@ -81,14 +96,12 @@ userSchema.methods.generateAuthToken = async function() {
 }
 
 userSchema.methods.toJSON = function() {
-  const user = this
+  const user = this.toObject({ virtuals: true })
 
-  const userObject = user.toObject()
+  delete user.password
+  delete user.tokens
 
-  delete userObject.password
-  delete userObject.tokens
-
-  return userObject
+  return user
 }
 
 const User = mongoose.model("User", userSchema)

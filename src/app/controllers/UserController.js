@@ -2,6 +2,11 @@ class UserController {
   async show(req, res) {
     const { user } = req
 
+    await user
+      .populate("branches")
+      .populate("exams")
+      .execPopulate()
+
     return res.send(user)
   }
 
@@ -9,7 +14,7 @@ class UserController {
     const { user } = req
 
     const updates = Object.keys(req.body)
-    const allowedUpdates = ["name", "email", "password", "age"]
+    const allowedUpdates = ["name", "email", "password"]
     const isUpdatesValid = updates.every(update =>
       allowedUpdates.includes(update)
     )

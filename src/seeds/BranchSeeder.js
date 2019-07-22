@@ -1,40 +1,23 @@
-const School = require("../app/models/School");
-const Branch = require("../app/models/Branch");
+const User = require("../app/models/User")
+const Branch = require("../app/models/Branch")
+const faker = require("faker")
+faker.locale = "pt_BR"
 
 module.exports = async () => {
-  const Unico = await School.findOne({ name: "Único" });
-  const EscritaUnica = await School.findOne({ name: "Escrita Única" });
-  const Seb = await School.findOne({ name: "SEB" });
-
-  const branches = [
-    {
-      name: "Asa Sul",
-      school: Unico._id
-    },
-    {
-      name: "Taguatinga",
-      school: Unico._id
-    },
-    {
-      name: "Asa Sul",
-      school: EscritaUnica._id
-    },
-    {
-      name: "Taguatinga",
-      school: EscritaUnica._id
-    },
-    {
-      name: "Asa Sul",
-      school: Seb._id
-    }
-  ];
+  const users = await User.find()
 
   await Promise.all(
-    branches.map(async branch => {
-      const branchInstance = new Branch(branch);
-      await branchInstance.save();
-    })
-  );
+    users.map(async user => {
+      for (let i = 0; i < 2; i++) {
+        const branch = new Branch({
+          name: faker.address.city(),
+          user: user._id
+        })
 
-  return console.log("Branches created successfully!");
-};
+        await branch.save()
+      }
+    })
+  )
+
+  return console.log("Branches created successfully!")
+}

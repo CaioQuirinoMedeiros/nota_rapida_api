@@ -3,15 +3,8 @@ const autopopulate = require("mongoose-autopopulate")
 
 const answerSchema = new mongoose.Schema(
   {
-    question: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Exam.questions",
-      required: true
-    },
-    marked: {
-      type: String,
-      default: null
-    },
+    question: { type: String, required: true },
+    marked: { type: String, default: null },
     correct: { type: Boolean, default: null },
     invalid: { type: Boolean, default: null },
     score: { type: Number, default: 0 }
@@ -19,27 +12,48 @@ const answerSchema = new mongoose.Schema(
   { toJSON: { virtuals: true } }
 )
 
+answerSchema.methods.findQuestion = async function() {
+  const exam = await this.parent().getExam()
+  const language = this.parent().language
+  const question = exam.questions.find(question => {
+    matchNumber = question.number === this.question
+
+    return matchNumber
+      ? question.language
+        ? question.language === language
+        : true
+      : false
+  })
+
+  return question
+}
+
+answerSchema.path("question").validate(async function(value) {
+  const question = await this.findQuestion()
+
+  return !!question
+})
+
+answerSchema.methods.correctQuestion = async function() {
+  if (!this.marked) return this
+
+  const question = await this.findQuestion()
+
+  if (!question) return this
+
+  if (this.marked.includes("|")) {
+    this.invalid = true
+    this.score = question.correct
+  } else {
+    this.correct = this.marked === question.response
+    this.score = this.correct ? question.correct : question.incorrect
+  }
+
+  return this
+}
+
 answerSchema.pre("save", async function() {
-  const test = await this.parent()
-    .populate("exam")
-    .execPopulate()
-
-  const question = test.exam.questions.id(this.question)
-
-  if (!question) {
-    throw new Error("Não existe essa questão na prova")
-  }
-
-  if (this.marked) {
-    if (this.marked.includes("|")) {
-      this.invalid = true
-    } else {
-      this.correct = this.marked === question.response
-      this.score = this.correct
-        ? question.value.correct
-        : question.value.incorrect
-    }
-  }
+  await this.correctQuestion()
 })
 
 const testSchema = new mongoose.Schema(
@@ -52,7 +66,8 @@ const testSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Exam"
     },
-    answers: [answerSchema],
+    language: { type: String, default: null },
+    answers: { type: [answerSchema], required: true },
     grade: { type: Number, default: null }
   },
   {
@@ -63,6 +78,12 @@ const testSchema = new mongoose.Schema(
     toJSON: { virtuals: true }
   }
 )
+
+testSchema.methods.getExam = async function() {
+  await this.populate("exam").execPopulate()
+
+  return this.exam
+}
 
 testSchema.pre("save", async function() {
   await this.calculateGrade()
@@ -125,8 +146,6 @@ testSchema.virtual("invalids").get(function() {
     percentage
   }
 })
-
-testSchema.plugin(autopopulate)
 
 const Test = mongoose.model("Test", testSchema)
 

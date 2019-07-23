@@ -22,7 +22,7 @@ module.exports = async () => {
             name: faker.name.findName(),
             registration: Math.random()
               .toString()
-              .substr(2, 5),
+              .substr(2, 7),
             team: team._id,
             user: user._id
           })

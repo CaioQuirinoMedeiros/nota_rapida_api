@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+const idvalidator = require("mongoose-id-validator")
 
 const categorySchema = new mongoose.Schema({
   name: {
@@ -30,9 +31,15 @@ const templateSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
+  },
   categories: [categorySchema],
   sections: [sectionSchema]
 })
+
+templateSchema.plugin(idvalidator)
 
 const Template = mongoose.model("Template", templateSchema)
 

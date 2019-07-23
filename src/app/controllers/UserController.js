@@ -4,6 +4,7 @@ class UserController {
 
     await user
       .populate("branches")
+      .populate("templates", "name")
       .populate("exams")
       .execPopulate()
 

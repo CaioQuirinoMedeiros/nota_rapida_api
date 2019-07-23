@@ -8,4 +8,8 @@ router.get("/templates", TemplateController.index)
 
 router.get("/templates/:id", TemplateController.show)
 
+router.put("/templates/:id", TemplateController.update)
+
+router.delete("/templates/:id", TemplateController.destroy)
+
 module.exports = router

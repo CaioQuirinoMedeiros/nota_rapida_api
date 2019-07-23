@@ -27,8 +27,9 @@ class ExamController {
   }
 
   async index(req, res) {
+    const { user } = req
     try {
-      const exams = await Exam.find()
+      const exams = await Exam.find({ user: user._id }).populate("tests")
 
       return res.status(200).send(exams)
     } catch (err) {
@@ -40,19 +41,19 @@ class ExamController {
   }
 
   async show(req, res) {
-    const { id } = req.params
+    const { id: _id } = req.params
+    const { user } = req
+
     try {
-      const exam = await Exam.findById(id)
+      const exam = await Exam.findOne({ _id, user: user._id })
 
       if (!exam) {
         return res.status(404).send({ error: "Prova não encontrada" })
       }
 
       await exam
-        .populate("user", "name")
         .populate("template", "name")
         .populate("tests")
-        .populate("numTests")
         .execPopulate()
 
       return res.status(200).send(exam)
@@ -60,7 +61,52 @@ class ExamController {
       console.log(err)
       return res
         .status(err.status || 400)
-        .send({ error: "Erro ao buscar as provas" })
+        .send({ error: "Erro ao buscar a prova" })
+    }
+  }
+
+  async update(req, res) {
+    const { id: _id } = req.params
+    const updates = req.body
+    const { user } = req
+
+    try {
+      const exam = await Exam.findOne({ _id, user: user._id })
+
+      if (!exam) {
+        return res.status(404).send({ error: "Prova não encontrada" })
+      }
+
+      await exam.customUpdate(updates)
+
+      await exam.populate("tests").execPopulate()
+
+      return res.status(200).send(exam)
+    } catch (err) {
+      console.log(err)
+      return res
+        .status(err.status || 400)
+        .send({ error: "Erro ao editar a prova" })
+    }
+  }
+
+  async destroy(req, res) {
+    const { id: _id } = req.params
+    const { user } = req
+
+    try {
+      const exam = await Exam.findOneAndDelete({ _id, user: user._id })
+
+      if (!exam) {
+        return res.status(404).send({ error: "Prova não encontrada" })
+      }
+
+      return res.status(200).send()
+    } catch (err) {
+      console.log(err)
+      return res
+        .status(err.status || 400)
+        .send({ error: "Erro ao deletar a prova" })
     }
   }
 }

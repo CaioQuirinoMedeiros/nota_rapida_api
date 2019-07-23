@@ -51,6 +51,12 @@ userSchema.virtual("branches", {
   foreignField: "user"
 })
 
+userSchema.virtual("templates", {
+  ref: "Template",
+  localField: "_id",
+  foreignField: "user"
+})
+
 userSchema.virtual("exams", {
   ref: "Exam",
   localField: "_id",

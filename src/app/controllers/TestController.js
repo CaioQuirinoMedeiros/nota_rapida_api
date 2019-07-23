@@ -18,8 +18,21 @@ class TestController {
   }
 
   async index(req, res) {
+    const { exam } = req.body
+    const { user } = req
+
     try {
-      const tests = await Test.find()
+      await user.populate("exams").execPopulate()
+
+      if (!user.exams.map(exam => exam.id).includes(exam)) {
+        return res.status(403).send({ error: "Essa prova não é sua" })
+      }
+
+      const tests = await Test.find({ exam })
+
+      if (!tests) {
+        return res.status(404).send({ error: "" })
+      }
 
       return res.status(200).send(tests)
     } catch (err) {
@@ -32,6 +45,7 @@ class TestController {
 
   async show(req, res) {
     const { id } = req.params
+
     try {
       const test = await Test.findById(id)
 
@@ -44,7 +58,6 @@ class TestController {
         .populate("exam", "name date")
         .execPopulate()
 
-      console.log(test.markeds)
       return res.status(200).send(test)
     } catch (err) {
       console.log(err)

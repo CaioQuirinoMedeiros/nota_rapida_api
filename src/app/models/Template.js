@@ -17,14 +17,6 @@ const categorySchema = new mongoose.Schema({
   }
 })
 
-const sectionSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true
-  }
-})
-
 const templateSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -36,11 +28,14 @@ const templateSchema = new mongoose.Schema({
     required: true
   },
   categories: [categorySchema],
-  sections: [sectionSchema]
+  sections: { type: [String], default: undefined },
+  subjects: { type: [String], default: undefined },
+  languages: { type: [String], default: undefined }
 })
 
 templateSchema.plugin(idvalidator)
 
 const Template = mongoose.model("Template", templateSchema)
+const Category = mongoose.model("Category", categorySchema)
 
 module.exports = Template

@@ -2,14 +2,16 @@ const Template = require("../models/Template")
 
 class TemplateController {
   async store(req, res) {
-    const { name, sections, categories } = req.body
+    const { name, sections, categories, subjects, languages } = req.body
     const { user } = req
 
     const template = new Template({
-      name,
       user: user._id,
+      name,
+      categories,
       sections,
-      categories
+      subjects,
+      languages
     })
 
     try {

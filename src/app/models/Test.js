@@ -1,6 +1,5 @@
 const mongoose = require("mongoose")
 const autopopulate = require("mongoose-autopopulate")
-const Exam = require("./exam")
 
 const answerSchema = new mongoose.Schema(
   {
@@ -21,10 +20,11 @@ const answerSchema = new mongoose.Schema(
 )
 
 answerSchema.pre("save", async function() {
-  const test = this.parent()
-  const exam = await test.getExam()
+  const test = await this.parent()
+    .populate("exam")
+    .execPopulate()
 
-  const question = exam.questions.id(this.question)
+  const question = test.exam.questions.id(this.question)
 
   if (!question) {
     throw new Error("Não existe essa questão na prova")
@@ -50,10 +50,10 @@ const testSchema = new mongoose.Schema(
     },
     exam: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Exam",
-      autopopulate: true
+      ref: "Exam"
     },
-    answers: [answerSchema]
+    answers: [answerSchema],
+    grade: { type: Number, default: null }
   },
   {
     timestamps: {
@@ -64,19 +64,15 @@ const testSchema = new mongoose.Schema(
   }
 )
 
-testSchema.plugin(autopopulate)
-
-testSchema.methods.getExam = async function() {
-  const exam = await Exam.findById(this.exam)
-
-  return exam
-}
-
-testSchema.virtual("grade").get(function() {
-  const grade = this.answers.reduce((acc, answer) => acc + answer.score, 0)
-
-  return grade
+testSchema.pre("save", async function() {
+  await this.calculateGrade()
 })
+
+testSchema.methods.calculateGrade = async function() {
+  this.grade = this.answers.reduce((acc, answer) => acc + answer.score, 0)
+
+  return this
+}
 
 testSchema.virtual("markeds").get(function() {
   const quantity = this.answers.filter(answer => answer.marked).length
@@ -129,6 +125,8 @@ testSchema.virtual("invalids").get(function() {
     percentage
   }
 })
+
+testSchema.plugin(autopopulate)
 
 const Test = mongoose.model("Test", testSchema)
 

@@ -4,56 +4,58 @@ const autopopulate = require("mongoose-autopopulate")
 const questionSchema = new mongoose.Schema(
   {
     number: { type: Number, required: true },
-    section: { type: mongoose.Schema.Types.ObjectId, ref: "Template.sections" },
-    category: {
-      category_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Template.categories",
-        required: true
-      },
-      name: String,
-      correct: Number,
-      incorrect: Number
-    },
-    response: { type: String, default: null }
+    category: { type: String, required: true },
+    section: { type: String, default: null },
+    subject: { type: String, default: null },
+    language: { type: String, default: null },
+    response: { type: String, default: null },
+    correct: { type: Number, default: 0 },
+    incorrect: { type: Number, default: 0 }
   },
   { toJSON: { virtuals: true } }
 )
 
-questionSchema.pre("save", async function() {
-  await this.updateCategory()
+questionSchema.path("category").validate(async function(value) {
+  const template = await this.parent().getTemplate()
+  const categoriesNames = template.categories.map(category => category.name)
+
+  return categoriesNames.includes(value)
 })
 
-questionSchema.methods.updateCategory = async function() {
-  const exam = await this.parent()
-    .populate("template")
-    .execPopulate()
+questionSchema.path("section").validate(async function(value) {
+  if (!value) return true
+  const template = await this.parent().getTemplate()
+  return template.sections.includes(value)
+})
 
-  const { name, correct, incorrect } = exam.template.categories.id(
-    this.category.category_id
+questionSchema.path("subject").validate(async function(value) {
+  if (!value) return true
+  const template = await this.parent().getTemplate()
+  return template.subjects.includes(value)
+})
+
+questionSchema.path("language").validate(async function(value) {
+  if (!value) return true
+  const template = await this.parent().getTemplate()
+  return template.languages.includes(value)
+})
+
+questionSchema.methods.calculateCorrectValue = async function() {
+  const template = await this.parent().getTemplate()
+  const { correct, incorrect } = template.categories.find(
+    category => category.name === this.category
   )
 
-  this.category = { ...this.category, name, correct, incorrect }
+  this.correct = correct
+  this.incorrect = incorrect
 
   return this
 }
 
-questionSchema.virtual("value").get(function() {
-  const { parameter } = this.parent()
-  const { correct, incorrect } = this.category
+questionSchema.pre("save", async function(next) {
+  await this.calculateCorrectValue()
 
-  return {
-    correct: correct * parameter,
-    incorrect: incorrect * parameter
-  }
-})
-
-questionSchema.virtual("percentages").get(function() {
-  const exam = this.parent()
-
-  console.log(exam)
-
-  return "oi"
+  return next()
 })
 
 const examSchema = new mongoose.Schema(
@@ -88,6 +90,12 @@ const examSchema = new mongoose.Schema(
   }
 )
 
+examSchema.methods.getTemplate = async function() {
+  await this.populate("template").execPopulate()
+
+  return this.template
+}
+
 examSchema.virtual("numQuestions").get(function() {
   if (!this.questions) return
 
@@ -97,7 +105,8 @@ examSchema.virtual("numQuestions").get(function() {
 examSchema.virtual("tests", {
   ref: "Test",
   localField: "_id",
-  foreignField: "exam"
+  foreignField: "exam",
+  autopopulate: true
 })
 
 examSchema.virtual("numTests", {
@@ -108,23 +117,23 @@ examSchema.virtual("numTests", {
   autopopulate: true
 })
 
-examSchema.virtual("maximumGrade").get(function() {
-  if (!this.questions || !this.questions.length) return null
+// examSchema.virtual("maximumGrade").get(function() {
+//   if (!this.questions || !this.questions.length) return null
 
-  return this.questions.reduce(
-    (acc, question) => acc + question.value.correct,
-    0
-  )
-})
+//   return this.questions.reduce(
+//     (acc, question) => acc + question.value.correct,
+//     0
+//   )
+// })
 
-examSchema.virtual("minimumGrade").get(function() {
-  if (!this.questions || !this.questions.length) return null
+// examSchema.virtual("minimumGrade").get(function() {
+//   if (!this.questions || !this.questions.length) return null
 
-  return this.questions.reduce(
-    (acc, question) => acc + question.value.incorrect,
-    0
-  )
-})
+//   return this.questions.reduce(
+//     (acc, question) => acc + question.value.incorrect,
+//     0
+//   )
+// })
 
 examSchema.virtual("mean").get(function() {
   if (!this.tests || !this.tests.length) return null
@@ -145,12 +154,6 @@ examSchema.pre("save", async function(next) {
   this.parameter = 100 / sumCorrects
 
   return next()
-})
-
-examSchema.post("save", async function() {
-  await this.populate("template", "name")
-
-  return this
 })
 
 examSchema.methods.customUpdate = async function(updates) {

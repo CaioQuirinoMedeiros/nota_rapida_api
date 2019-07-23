@@ -1,4 +1,4 @@
-const Exam = require("../models/exam")
+const Exam = require("../models/Exam")
 
 class ExamController {
   async store(req, res) {
@@ -6,16 +6,18 @@ class ExamController {
     const { user } = req
 
     const exam = new Exam({
+      user: user._id,
       name,
       date,
       parameter,
-      user,
       template,
       questions
     })
 
     try {
       await exam.save()
+
+      await exam.populate("template", "name").execPopulate()
 
       return res.status(201).send(exam)
     } catch (err) {
@@ -54,6 +56,7 @@ class ExamController {
       await exam
         .populate("template", "name")
         .populate("tests")
+        .populate("questions.category")
         .execPopulate()
 
       return res.status(200).send(exam)

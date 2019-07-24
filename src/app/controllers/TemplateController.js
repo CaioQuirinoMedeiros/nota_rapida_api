@@ -63,19 +63,17 @@ class TemplateController {
 
   async update(req, res) {
     const { id: _id } = req.params
-    const { name } = req.body
+    const updates = req.body
     const { user } = req
 
     try {
-      const template = await Template.findOneAndUpdate(
-        { _id, user: user._id },
-        { name },
-        { new: true, runValidators: true }
-      )
+      const template = await Template.findOne({ _id, user: user._id })
 
       if (!template) {
         return res.status(404).send({ error: "Modelo não encontrado" })
       }
+
+      await template.customUpdate(updates)
 
       return res.status(200).send(template)
     } catch (err) {

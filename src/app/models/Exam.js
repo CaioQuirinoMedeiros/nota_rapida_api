@@ -40,7 +40,16 @@ questionSchema.path("language").validate(async function(value) {
   return template.languages.includes(value)
 })
 
-questionSchema.methods.calculateCorrectValue = async function() {
+questionSchema.virtual("value").get(function() {
+  const { parameter } = this.parent()
+
+  return {
+    correct: parameter * this.correct,
+    incorrect: parameter * this.incorrect
+  }
+})
+
+questionSchema.methods.calculateCorrectWeight = async function() {
   const template = await this.parent().getTemplate()
   const { correct, incorrect } = template.categories.find(
     category => category.name === this.category
@@ -53,7 +62,7 @@ questionSchema.methods.calculateCorrectValue = async function() {
 }
 
 questionSchema.pre("save", async function(next) {
-  await this.calculateCorrectValue()
+  await this.calculateCorrectWeight()
 
   return next()
 })
@@ -79,7 +88,7 @@ const examSchema = new mongoose.Schema(
       ref: "Template",
       required: true
     },
-    questions: [questionSchema]
+    questions: { type: [questionSchema], required: true }
   },
   {
     timestamps: {
@@ -105,8 +114,7 @@ examSchema.virtual("numQuestions").get(function() {
 examSchema.virtual("tests", {
   ref: "Test",
   localField: "_id",
-  foreignField: "exam",
-  autopopulate: true
+  foreignField: "exam"
 })
 
 examSchema.virtual("numTests", {
@@ -117,23 +125,19 @@ examSchema.virtual("numTests", {
   autopopulate: true
 })
 
-// examSchema.virtual("maximumGrade").get(function() {
-//   if (!this.questions || !this.questions.length) return null
+examSchema.virtual("maximumGrade").get(function() {
+  return this.questions.reduce(
+    (acc, question) => acc + question.value.correct,
+    0
+  )
+})
 
-//   return this.questions.reduce(
-//     (acc, question) => acc + question.value.correct,
-//     0
-//   )
-// })
-
-// examSchema.virtual("minimumGrade").get(function() {
-//   if (!this.questions || !this.questions.length) return null
-
-//   return this.questions.reduce(
-//     (acc, question) => acc + question.value.incorrect,
-//     0
-//   )
-// })
+examSchema.virtual("minimumGrade").get(function() {
+  return this.questions.reduce(
+    (acc, question) => acc + question.value.incorrect,
+    0
+  )
+})
 
 examSchema.virtual("mean").get(function() {
   if (!this.tests || !this.tests.length) return null
@@ -143,15 +147,23 @@ examSchema.virtual("mean").get(function() {
   )
 })
 
-examSchema.pre("save", async function(next) {
-  if (this.parameter) return next()
-
+examSchema.methods.calculateParameter = async function() {
   const sumCorrects = this.questions.reduce(
-    (acc, question) => acc + question.category.correct,
+    (acc, question) => acc + question.correct,
     0
   )
 
+  console.log("SUM: ", sumCorrects)
+
   this.parameter = 100 / sumCorrects
+
+  console.log(this.parameter)
+
+  return this
+}
+
+examSchema.pre("save", async function(next) {
+  if (!this.parameter) await this.calculateParameter()
 
   return next()
 })

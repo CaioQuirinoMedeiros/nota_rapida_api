@@ -3,7 +3,7 @@ const autopopulate = require("mongoose-autopopulate")
 
 const answerSchema = new mongoose.Schema(
   {
-    question: { type: String, required: true },
+    question: { type: Number, required: true },
     marked: { type: String, default: null },
     correct: { type: Boolean, default: null },
     invalid: { type: Boolean, default: null },
@@ -29,7 +29,10 @@ answerSchema.methods.findQuestion = async function() {
 }
 
 answerSchema.path("question").validate(async function(value) {
-  const question = await this.findQuestion()
+  let exam = await this.parent().getExam()
+  exam = exam.toObject()
+
+  const question = exam.questions.find(question => question.number === value)
 
   return !!question
 })
@@ -39,15 +42,23 @@ answerSchema.methods.correctQuestion = async function() {
 
   const question = await this.findQuestion()
 
-  if (!question) return this
+  if (!question) {
+    this.invalid = true
+    return this
+  }
+
+  if (!question.response) {
+    this.score === question.correct
+    return this
+  }
 
   if (this.marked.includes("|")) {
     this.invalid = true
-    this.score = question.correct
-  } else {
-    this.correct = this.marked === question.response
-    this.score = this.correct ? question.correct : question.incorrect
+    return this
   }
+
+  this.correct = this.marked === question.response
+  this.score = this.correct ? question.correct : question.incorrect
 
   return this
 }

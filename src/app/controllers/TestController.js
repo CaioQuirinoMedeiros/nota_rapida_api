@@ -2,8 +2,8 @@ const Test = require("../models/Test")
 
 class TestController {
   async store(req, res) {
-    const { student, exam, answers } = req.body
-    const test = new Test({ student, exam, answers })
+    const { student, exam, answers, language } = req.body
+    const test = new Test({ student, exam, answers, language })
 
     try {
       await test.save()
@@ -53,10 +53,7 @@ class TestController {
         return res.status(404).send({ error: "Cartão não encontrada" })
       }
 
-      await test
-        .populate("student", "name")
-        .populate("exam", "name date")
-        .execPopulate()
+      await test.populate("student", "name").execPopulate()
 
       return res.status(200).send(test)
     } catch (err) {

@@ -33,9 +33,32 @@ const templateSchema = new mongoose.Schema({
   languages: { type: [String], default: undefined }
 })
 
+templateSchema.methods.customUpdate = async function(updates) {
+  const updatesKeys = Object.keys(updates)
+  const allowedUpdates = [
+    "name",
+    "categories",
+    "sections",
+    "languages",
+    "subjects"
+  ]
+  const isUpdatesValid = updatesKeys.every(update =>
+    allowedUpdates.includes(update)
+  )
+
+  if (!isUpdatesValid) {
+    throw new Error("Parâmetros incorretos para editar o aluno")
+  }
+
+  updatesKeys.forEach(update => (this[update] = updates[update]))
+
+  await this.save()
+
+  return this
+}
+
 templateSchema.plugin(idvalidator)
 
 const Template = mongoose.model("Template", templateSchema)
-const Category = mongoose.model("Category", categorySchema)
 
 module.exports = Template

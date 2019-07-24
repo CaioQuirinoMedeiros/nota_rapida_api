@@ -23,7 +23,11 @@ class StudentController {
     const { user } = req
 
     try {
-      const students = await Student.find({ user })
+      const students = await Student.find({ user }).populate({
+        path: "team",
+        select: "name",
+        populate: { path: "branch", select: "name" }
+      })
 
       return res.status(200).send(students)
     } catch (err) {
@@ -40,15 +44,16 @@ class StudentController {
 
     try {
       const student = await Student.findOne({ _id, user: user._id })
+        .populate({
+          path: "team",
+          select: "name",
+          populate: { path: "branch", select: "name" }
+        })
+        .populate("tests")
 
       if (!student) {
         return res.status(404).send({ error: "Aluno não encontrado" })
       }
-
-      await student
-        .populate("team", "name")
-        .populate("tests")
-        .execPopulate()
 
       return res.status(200).send(student)
     } catch (err) {

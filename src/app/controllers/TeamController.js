@@ -40,15 +40,12 @@ class TeamController {
     try {
       await user.populate("branches").execPopulate()
       const team = await Team.findOne({ _id, branch: { $in: user.branches } })
+        .populate("branch", "name")
+        .populate("students", "name registration")
 
       if (!team) {
         return res.status(404).send({ error: "Turma não encontrada" })
       }
-
-      await team
-        .populate("branch")
-        .populate("students")
-        .execPopulate()
 
       return res.status(200).send(team)
     } catch (err) {

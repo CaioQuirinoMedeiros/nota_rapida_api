@@ -38,9 +38,9 @@ class BranchController {
     const { id: _id } = req.params
     const { user } = req
     try {
-      const branch = await Branch.findOne({ _id, user: user._id })
-        .populate("user", "name")
-        .populate("teams")
+      const branch = await Branch.findOne({ _id, user: user._id }).populate(
+        "teams"
+      )
 
       if (!branch) {
         return res.status(404).send({ error: "Unidade não encontrada" })

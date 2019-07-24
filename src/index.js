@@ -1,6 +1,7 @@
 const express = require("express")
 require("./config/database/mongoose")
 require("dotenv").config()
+const cors = require("cors")
 const auth = require("./app/middlewares/auth")
 
 const authRouter = require("./routes/auth")
@@ -14,8 +15,9 @@ const testRouter = require("./routes/test")
 
 const app = express()
 
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 3333
 
+app.use(cors())
 app.use(express.json())
 app.use(authRouter)
 

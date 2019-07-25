@@ -58,14 +58,14 @@ class TeamController {
 
   async update(req, res) {
     const { id: _id } = req.params
-    const { name } = req.body
+    const { name, branch } = req.body
     const { user } = req
 
     try {
       await user.populate("branches").execPopulate()
       const team = await Team.findOneAndUpdate(
         { _id, branch: { $in: user.branches } },
-        { name },
+        { name, branch },
         { new: true, runValidators: true }
       )
 
@@ -97,7 +97,7 @@ class TeamController {
         return res.status(404).send({ error: "Turma não encontrada" })
       }
 
-      return res.status(200).send()
+      return res.status(200).send(team)
     } catch (err) {
       console.log(err)
       return res

@@ -91,7 +91,7 @@ class BranchController {
         return res.status(404).send({ error: "Unidade não encontrada" })
       }
 
-      return res.status(200).send()
+      return res.status(200).send(branch)
     } catch (err) {
       console.log(err)
       return res

@@ -2,13 +2,7 @@ class UserController {
   async show(req, res) {
     const { user } = req
 
-    await user
-      .populate("branches")
-      .populate("templates", "name")
-      .populate("exams")
-      .execPopulate()
-
-    return res.send(user)
+    return res.status(200).send(user)
   }
 
   async update(req, res) {

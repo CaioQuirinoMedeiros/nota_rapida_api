@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
   },
-  { toJSON: { virtuals: true }, timestamps: true }
+  { toJSON: { virtuals: true }, timestamps: true, versionKey: false }
 );
 
 userSchema.virtual('branches', {
@@ -68,7 +68,7 @@ userSchema.methods.generateJWT = async function() {
   return token;
 };
 
-userSchema.methods.customUpdate = async function customUpdate(updates) {
+userSchema.methods.customUpdate = async function(updates) {
   const updatesKeys = Object.keys(updates);
   const allowedUpdates = ['name', 'email', 'password'];
 
@@ -83,7 +83,7 @@ userSchema.methods.customUpdate = async function customUpdate(updates) {
   return this;
 };
 
-userSchema.methods.toJSON = function toJSON() {
+userSchema.methods.toJSON = function() {
   const user = this.toObject({ virtuals: true });
 
   delete user.password;

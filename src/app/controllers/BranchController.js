@@ -16,7 +16,9 @@ class BranchController {
 
   async index(req, res) {
     try {
-      const branches = await Branch.find({ user: req.user._id });
+      const branches = await Branch.find({ user: req.user._id }).populate(
+        'numTeams'
+      );
 
       return res.status(200).send(branches);
     } catch (err) {
@@ -29,7 +31,9 @@ class BranchController {
     const { id: _id } = req.params;
 
     try {
-      const branch = await Branch.findOne({ _id, user: req.user._id });
+      const branch = await Branch.findOne({ _id, user: req.user._id })
+        .populate('teams')
+        .populate('numTeams');
 
       if (!branch) {
         return res.status(404).send({ error: 'Unidade não encontrada' });

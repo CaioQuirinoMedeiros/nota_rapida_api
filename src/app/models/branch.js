@@ -14,7 +14,7 @@ const branchSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { toJSON: { virtuals: true } }
+  { toJSON: { virtuals: true }, versionKey: false }
 );
 
 branchSchema.virtual('teams', {

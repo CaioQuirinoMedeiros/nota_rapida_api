@@ -1,94 +1,91 @@
-const mongoose = require("mongoose")
-const idvalidator = require("mongoose-id-validator")
-const autopopulate = require("mongoose-autopopulate")
+const mongoose = require('mongoose');
+const idvalidator = require('mongoose-id-validator');
 
 const studentSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     registration: {
       type: String,
       required: true,
-      trim: true
-    },
-    unique_registration: {
-      type: String,
-      unique: true
+      trim: true,
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true
+      ref: 'User',
+      required: true,
     },
     team: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Team"
-    }
+      ref: 'Team',
+    },
   },
   {
     timestamps: {
-      createdAt: "created_at",
-      updatedAt: "updated_at"
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
     },
-    toJSON: { virtuals: true }
+    toJSON: { virtuals: true },
   }
-)
+);
 
-studentSchema.virtual("tests", {
-  ref: "Test",
-  localField: "_id",
-  foreignField: "student"
-})
+studentSchema.virtual('tests', {
+  ref: 'Test',
+  localField: '_id',
+  foreignField: 'student',
+});
 
-studentSchema.virtual("numTests", {
-  ref: "Test",
-  localField: "_id",
-  foreignField: "student",
-  count: true
-})
+studentSchema.virtual('numTests', {
+  ref: 'Test',
+  localField: '_id',
+  foreignField: 'student',
+  count: true,
+});
 
-studentSchema.methods.customUpdate = async function(updates) {
-  const updatesKeys = Object.keys(updates)
-  const allowedUpdates = ["name", "registration", "team"]
+studentSchema.methods.customUpdate = async function customUpdate(updates) {
+  const updatesKeys = Object.keys(updates);
+  const allowedUpdates = ['name', 'registration', 'team'];
   const isUpdatesValid = updatesKeys.every(update =>
     allowedUpdates.includes(update)
-  )
+  );
 
   if (!isUpdatesValid) {
-    throw new Error("Parâmetros incorretos para editar o aluno")
+    throw new Error('Parâmetros incorretos para editar o aluno');
   }
 
-  updatesKeys.forEach(update => (this[update] = updates[update]))
+  updatesKeys.forEach(update => {
+    this[update] = updates[update];
+  });
 
-  await this.save()
+  await this.save();
 
-  return this
-}
+  return this;
+};
 
-studentSchema.methods.getBranch = async function() {
-  await this.populate({ path: "team", populate: "branch" }).execPopulate()
+studentSchema.methods.getBranch = async function getBranch() {
+  await this.populate({ path: 'team', populate: 'branch' }).execPopulate();
 
-  return this.team.branch
-}
+  return this.team.branch;
+};
 
-studentSchema.methods.updateUniqueRegistration = async function() {
-  const branch = await this.getBranch()
+studentSchema.methods.updateUniqueRegistration = async function updateUniqueRegistration() {
+  const branch = await this.getBranch();
 
-  this.unique_registration = `${branch.id}.${this.registration}`
+  this.unique_registration = `${branch.id}.${this.registration}`;
 
-  return this
-}
+  return this;
+};
 
-studentSchema.pre("save", async function(next) {
-  await this.updateUniqueRegistration()
-  return next()
-})
+studentSchema.pre('save', async function preSave(next) {
+  await this.updateUniqueRegistration();
+  return next();
+});
 
-studentSchema.plugin(idvalidator)
+studentSchema.plugin(idvalidator);
 
-const Student = mongoose.model("Student", studentSchema)
+const Student = mongoose.model('Student', studentSchema);
 
-module.exports = Student
+export default Student;

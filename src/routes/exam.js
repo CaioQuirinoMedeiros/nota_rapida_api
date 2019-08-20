@@ -1,15 +1,16 @@
-const express = require("express")
-const router = new express.Router()
-const ExamController = require("../app/controllers/ExamController")
+import express from 'express';
+import ExamController from '../app/controllers/ExamController';
 
-router.post("/exams", ExamController.store)
+const router = new express.Router();
 
-router.get("/exams", ExamController.index)
+router.post('/exams', ExamController.store);
 
-router.get("/exams/:id", ExamController.show)
+router.get('/exams', ExamController.index);
 
-router.put("/exams/:id", ExamController.update)
+router.get('/exams/:id', ExamController.show);
 
-router.delete("/exams/:id", ExamController.destroy)
+router.put('/exams/:id', ExamController.update);
 
-module.exports = router
+router.delete('/exams/:id', ExamController.destroy);
+
+export default router;

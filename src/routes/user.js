@@ -1,12 +1,15 @@
-const express = require("express")
-const router = new express.Router()
-const auth = require("../app/middlewares/auth")
-const UserController = require("../app/controllers/UserController")
+import express from 'express';
+import UserController from '../app/controllers/UserController';
+import auth from '../app/middlewares/auth';
 
-router.get("/me", UserController.show)
+const router = new express.Router();
 
-router.patch("/me", UserController.update)
+router.use(auth);
 
-router.delete("/me", UserController.delete)
+router.get('/me', UserController.show);
 
-module.exports = router
+router.patch('/me', UserController.update);
+
+router.delete('/me', UserController.delete);
+
+export default router;

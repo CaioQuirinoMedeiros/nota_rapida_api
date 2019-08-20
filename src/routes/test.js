@@ -1,11 +1,15 @@
-const express = require("express")
-const router = new express.Router()
-const TestController = require("../app/controllers/TestController")
+import express from 'express';
+import TestController from '../app/controllers/TestController';
+import auth from '../app/middlewares/auth';
 
-router.post("/tests", TestController.store)
+const router = new express.Router();
 
-router.get("/tests", TestController.index)
+router.use(auth);
 
-router.get("/tests/:id", TestController.show)
+router.post('/tests', TestController.store);
 
-module.exports = router
+router.get('/tests', TestController.index);
+
+router.get('/tests/:id', TestController.show);
+
+export default router;

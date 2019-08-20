@@ -1,110 +1,104 @@
-const Team = require("../models/Team")
+import Team from '../models/Team';
+import Branch from '../models/Branch';
 
 class TeamController {
   async store(req, res) {
-    const { name, branch } = req.body
-    const team = new Team({ name, branch })
+    const { name, branch_id } = req.body;
 
     try {
-      await team.save()
+      const branch = await Branch.findOne({
+        _id: branch_id,
+        user: req.user._id,
+      });
 
-      return res.status(201).send(team)
+      if (!branch) {
+        return res.status(404).send({ error: 'Unidade não encontrada' });
+      }
+
+      const team = await Team.create({
+        name,
+        branch: branch_id,
+        user: req.user._id,
+      });
+
+      return res.status(201).send(team);
     } catch (err) {
-      console.log(err)
-      return res
-        .status(err.status || 400)
-        .send({ error: "Não foi possível criar a turma" })
+      console.log(err);
+      return res.status(400).send({ error: 'Não foi possível criar a turma' });
     }
   }
 
   async index(req, res) {
-    const { user } = req
-
     try {
-      await user.populate("branches").execPopulate()
-      const teams = await Team.find({ branch: { $in: user.branches } })
+      const teams = await Team.find({ user: req.user._id });
 
-      return res.status(200).send(teams)
+      return res.status(200).send(teams);
     } catch (err) {
-      console.log(err)
-      return res
-        .status(err.status || 400)
-        .send({ error: "Erro ao buscar as turmas" })
+      console.log(err);
+      return res.status(400).send({ error: 'Erro ao buscar as turmas' });
     }
   }
 
   async show(req, res) {
-    const { id: _id } = req.params
-    const { user } = req
+    const { id: _id } = req.params;
 
     try {
-      await user.populate("branches").execPopulate()
-      const team = await Team.findOne({ _id, branch: { $in: user.branches } })
-        .populate("branch", "name")
-        .populate("students", "name registration")
+      const team = await Team.findOne({ _id, user: req.user._id }).populate(
+        'students',
+        'name registration'
+      );
 
       if (!team) {
-        return res.status(404).send({ error: "Turma não encontrada" })
+        return res.status(404).send({ error: 'Turma não encontrada' });
       }
 
-      return res.status(200).send(team)
+      return res.status(200).send(team);
     } catch (err) {
-      console.log(err)
-      return res
-        .status(err.status || 400)
-        .send({ error: "Erro ao buscar as turmas" })
+      console.log(err);
+      return res.status(400).send({ error: 'Erro ao buscar as turmas' });
     }
   }
 
   async update(req, res) {
-    const { id: _id } = req.params
-    const { name, branch } = req.body
-    const { user } = req
+    const { id: _id } = req.params;
+    const { name, branch_id } = req.body;
 
     try {
-      await user.populate("branches").execPopulate()
       const team = await Team.findOneAndUpdate(
-        { _id, branch: { $in: user.branches } },
-        { name, branch },
+        { _id, user: req.user._id },
+        { name, branch: branch_id },
         { new: true, runValidators: true }
-      )
+      );
 
       if (!team) {
-        return res.status(404).send({ error: "Turma não encontrada" })
+        return res.status(404).send({ error: 'Turma não encontrada' });
       }
 
-      return res.status(200).send(team)
+      return res.status(200).send(team);
     } catch (err) {
-      console.log(err)
-      return res
-        .status(err.status || 400)
-        .send({ error: "Não foi possível editar a turma" })
+      console.log(err);
+      return res.status(400).send({ error: 'Não foi possível editar a turma' });
     }
   }
 
   async destroy(req, res) {
-    const { id: _id } = req.params
-    const { user } = req
+    const { id: _id } = req.params;
 
     try {
-      await user.populate("branches").execPopulate()
-      const team = await Team.findOneAndDelete({
-        _id,
-        branch: { $in: user.branches }
-      })
+      const team = await Team.findOneAndDelete({ _id, user: req.user._id });
 
       if (!team) {
-        return res.status(404).send({ error: "Turma não encontrada" })
+        return res.status(404).send({ error: 'Turma não encontrada' });
       }
 
-      return res.status(200).send(team)
+      return res.status(200).send(team);
     } catch (err) {
-      console.log(err)
+      console.log(err);
       return res
-        .status(err.status || 400)
-        .send({ error: "Não foi possível deletar a turma" })
+        .status(400)
+        .send({ error: 'Não foi possível deletar a turma' });
     }
   }
 }
 
-module.exports = new TeamController()
+export default new TeamController();

@@ -1,14 +1,16 @@
-const mongoose = require("mongoose")
-const validator = require("validator")
-const bcrypt = require("bcryptjs")
-const jwt = require("jsonwebtoken")
+import mongoose from 'mongoose';
+import validator from 'validator';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+
+import authConfig from '../../config/auth';
 
 const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     email: {
       type: String,
@@ -16,11 +18,11 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
-      validate(value) {
+      validate: value => {
         if (!validator.isEmail(value)) {
-          throw new Error("Email is invalid")
+          throw new Error('Email is invalid');
         }
-      }
+      },
     },
     password: {
       type: String,
@@ -28,88 +30,78 @@ const userSchema = new mongoose.Schema(
       minlength: 7,
       trim: true,
       validate(value) {
-        if (value === "password") {
-          throw new Error("Your password cannot be 'password'")
+        if (value === 'password') {
+          throw new Error("Your password cannot be 'password'");
         }
-      }
+      },
     },
     tokens: [
       {
         token: {
           type: String,
-          required: true
-        }
-      }
-    ]
+          required: true,
+        },
+      },
+    ],
   },
-  { toJSON: { virtuals: true } }
-)
+  { toJSON: { virtuals: true }, timestamps: true }
+);
 
-userSchema.virtual("branches", {
-  ref: "Branch",
-  localField: "_id",
-  foreignField: "user"
-})
+userSchema.virtual('branches', {
+  ref: 'Branch',
+  localField: '_id',
+  foreignField: 'user',
+});
 
-userSchema.virtual("templates", {
-  ref: "Template",
-  localField: "_id",
-  foreignField: "user"
-})
+userSchema.virtual('templates', {
+  ref: 'Template',
+  localField: '_id',
+  foreignField: 'user',
+});
 
-userSchema.virtual("exams", {
-  ref: "Exam",
-  localField: "_id",
-  foreignField: "user"
-})
+userSchema.virtual('exams', {
+  ref: 'Exam',
+  localField: '_id',
+  foreignField: 'user',
+});
 
-userSchema.pre("save", async function(next) {
-  const user = this
-
-  if (user.isModified("password")) {
-    user.password = await bcrypt.hash(user.password, 8)
+userSchema.pre('save', async function(next) {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 8);
   }
 
-  next()
-})
+  return next();
+});
 
-userSchema.statics.findByCredentials = async (email, password) => {
-  const user = await User.findOne({ email })
+userSchema.methods.checkPassword = function(password) {
+  return bcrypt.compare(password, this.password);
+};
 
-  if (!user) {
-    throw new Error("Email não registrado")
-  }
+userSchema.statics.findByEmail = function(email) {
+  return this.findOne({ email });
+};
 
-  const isMatch = await bcrypt.compare(password, user.password)
+userSchema.methods.generateJWT = async function() {
+  const token = jwt.sign({ id: this.id }, authConfig.secret, {
+    expiresIn: authConfig.expiresIn,
+  });
 
-  if (!isMatch) {
-    throw new Error("Senha inválida")
-  }
+  this.tokens = this.tokens.concat({ token });
 
-  return user
-}
+  await this.save();
 
-userSchema.methods.generateAuthToken = async function() {
-  const user = this
+  return token;
+};
 
-  const token = jwt.sign({ id: user._id.toString() }, process.env.JWT_SECRET)
+userSchema.methods.toJSON = function toJSON() {
+  const user = this.toObject({ virtuals: true });
 
-  user.tokens = user.tokens.concat({ token })
+  delete user.password;
+  delete user.tokens;
 
-  await user.save()
+  return user;
+};
 
-  return token
-}
+const User = mongoose.model('User', userSchema);
 
-userSchema.methods.toJSON = function() {
-  const user = this.toObject({ virtuals: true })
-
-  delete user.password
-  delete user.tokens
-
-  return user
-}
-
-const User = mongoose.model("User", userSchema)
-
-module.exports = User
+export default User;

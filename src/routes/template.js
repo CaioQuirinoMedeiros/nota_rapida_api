@@ -1,15 +1,19 @@
-const express = require("express")
-const router = new express.Router()
-const TemplateController = require("../app/controllers/TemplateController")
+import express from 'express';
+import TemplateController from '../app/controllers/TemplateController';
+import auth from '../app/middlewares/auth';
 
-router.post("/templates", TemplateController.store)
+const router = new express.Router();
 
-router.get("/templates", TemplateController.index)
+router.use(auth);
 
-router.get("/templates/:id", TemplateController.show)
+router.post('/templates', TemplateController.store);
 
-router.put("/templates/:id", TemplateController.update)
+router.get('/templates', TemplateController.index);
 
-router.delete("/templates/:id", TemplateController.destroy)
+router.get('/templates/:id', TemplateController.show);
 
-module.exports = router
+router.put('/templates/:id', TemplateController.update);
+
+router.delete('/templates/:id', TemplateController.destroy);
+
+export default router;

@@ -1,16 +1,19 @@
-const express = require("express")
-const router = new express.Router()
-const auth = require("../app/middlewares/auth")
-const TeamController = require("../app/controllers/TeamController")
+import express from 'express';
+import TeamController from '../app/controllers/TeamController';
+import auth from '../app/middlewares/auth';
 
-router.post("/teams", TeamController.store)
+const router = new express.Router();
 
-router.get("/teams", TeamController.index)
+router.use(auth);
 
-router.get("/teams/:id", TeamController.show)
+router.post('/teams', TeamController.store);
 
-router.put("/teams/:id", TeamController.update)
+router.get('/teams', TeamController.index);
 
-router.delete("/teams/:id", TeamController.destroy)
+router.get('/teams/:id', TeamController.show);
 
-module.exports = router
+router.put('/teams/:id', TeamController.update);
+
+router.delete('/teams/:id', TeamController.destroy);
+
+export default router;

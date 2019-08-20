@@ -1,64 +1,66 @@
-const mongoose = require("mongoose")
-const idvalidator = require("mongoose-id-validator")
+const mongoose = require('mongoose');
+const idvalidator = require('mongoose-id-validator');
 
 const categorySchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   correct: {
     type: Number,
-    required: true
+    required: true,
   },
   incorrect: {
     type: Number,
-    required: true
-  }
-})
+    required: true,
+  },
+});
 
 const templateSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true
+    required: true,
   },
   categories: [categorySchema],
   sections: { type: [String], default: undefined },
   subjects: { type: [String], default: undefined },
-  languages: { type: [String], default: undefined }
-})
+  languages: { type: [String], default: undefined },
+});
 
-templateSchema.methods.customUpdate = async function(updates) {
-  const updatesKeys = Object.keys(updates)
+templateSchema.methods.customUpdate = async function customUpdate(updates) {
+  const updatesKeys = Object.keys(updates);
   const allowedUpdates = [
-    "name",
-    "categories",
-    "sections",
-    "languages",
-    "subjects"
-  ]
+    'name',
+    'categories',
+    'sections',
+    'languages',
+    'subjects',
+  ];
   const isUpdatesValid = updatesKeys.every(update =>
     allowedUpdates.includes(update)
-  )
+  );
 
   if (!isUpdatesValid) {
-    throw new Error("Parâmetros incorretos para editar o aluno")
+    throw new Error('Parâmetros incorretos para editar o aluno');
   }
 
-  updatesKeys.forEach(update => (this[update] = updates[update]))
+  updatesKeys.forEach(update => {
+    this[update] = updates[update];
+  });
 
-  await this.save()
+  await this.save();
 
-  return this
-}
+  return this;
+};
 
-templateSchema.plugin(idvalidator)
+templateSchema.plugin(idvalidator);
 
-const Template = mongoose.model("Template", templateSchema)
+const Template = mongoose.model('Template', templateSchema);
 
-module.exports = Template
+export default Template;

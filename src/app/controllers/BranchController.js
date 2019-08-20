@@ -1,104 +1,89 @@
-const Branch = require("../models/Branch")
+import Branch from '../models/Branch';
 
 class BranchController {
   async store(req, res) {
-    const { name } = req.body
-    const { user } = req
+    const { name } = req.body;
 
     try {
-      const branch = new Branch({ name, user: user._id })
+      const branch = await Branch.create({ name, user: req.user._id });
 
-      await branch.save()
-
-      return res.status(201).send(branch)
+      return res.status(201).send(branch);
     } catch (err) {
-      console.log(err)
-      return res
-        .status(err.status || 400)
-        .send({ error: "Não foi possível criar a unidade" })
+      console.log(err);
+      return res.status(400).send({ error: 'Erro ao criar a unidade' });
     }
   }
 
   async index(req, res) {
-    const { user } = req
-
     try {
-      await user.populate("branches").execPopulate()
+      const branches = await Branch.find({ user: req.user._id });
 
-      return res.status(200).send(user.branches)
+      return res.status(200).send(branches);
     } catch (err) {
-      console.log(err)
-      return res
-        .status(err.status || 400)
-        .send({ error: "Erro ao buscar as unidades" })
+      console.log(err);
+      return res.status(400).send({ error: 'Erro ao buscar as unidades' });
     }
   }
 
   async show(req, res) {
-    const { id: _id } = req.params
-    const { user } = req
+    const { id: _id } = req.params;
+
     try {
-      const branch = await Branch.findOne({ _id, user: user._id }).populate(
-        "teams"
-      )
+      const branch = await Branch.findOne({ _id, user: req.user._id });
 
       if (!branch) {
-        return res.status(404).send({ error: "Unidade não encontrada" })
+        return res.status(404).send({ error: 'Unidade não encontrada' });
       }
 
-      return res.status(200).send(branch)
+      return res.status(200).send(branch);
     } catch (err) {
-      console.log(err)
-      return res
-        .status(err.status || 400)
-        .send({ error: "Erro ao buscar as unidades" })
+      console.log(err);
+      return res.status(400).send({ error: 'Erro ao buscar as unidades' });
     }
   }
 
   async update(req, res) {
-    const { id: _id } = req.params
-    const { name } = req.body
-    const { user } = req
+    const { id: _id } = req.params;
+    const { name } = req.body;
 
     try {
       const branch = await Branch.findOneAndUpdate(
-        { _id, user: user._id },
+        { _id, user: req.user._id },
         { name },
         { new: true, runValidators: true }
-      )
+      );
 
       if (!branch) {
-        return res.status(404).send({ error: "Unidade não encontrada" })
+        return res.status(404).send({ error: 'Unidade não encontrada' });
       }
 
-      return res.status(200).send(branch)
+      return res.status(200).send(branch);
     } catch (err) {
-      console.log(err)
+      console.log(err);
       return res
-        .status(err.status || 400)
-        .send({ error: "Não foi possível editar a unidade" })
+        .status(400)
+        .send({ error: 'Não foi possível editar a unidade' });
     }
   }
 
   async destroy(req, res) {
-    const { id: _id } = req.params
-    const { user } = req
+    const { id: _id } = req.params;
 
     try {
-      const branch = await Branch.findOneAndDelete({ _id, user: user._id })
+      const branch = await Branch.findOneAndDelete({ _id, user: req.user._id });
 
       if (!branch) {
-        return res.status(404).send({ error: "Unidade não encontrada" })
+        return res.status(404).send({ error: 'Unidade não encontrada' });
       }
 
-      return res.status(200).send(branch)
+      return res.status(200).send(branch);
     } catch (err) {
-      console.log(err)
+      console.log(err);
       return res
-        .status(err.status || 400)
-        .send({ error: "Não foi possível deletar a unidade" })
+        .status(400)
+        .send({ error: 'Não foi possível deletar a unidade' });
     }
   }
 }
 
-module.exports = new BranchController()
+export default new BranchController();

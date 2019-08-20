@@ -1,9 +1,9 @@
-const Exam = require("../models/Exam")
+import Exam from '../models/Exam';
 
 class ExamController {
   async store(req, res) {
-    const { name, date, parameter, template, questions } = req.body
-    const { user } = req
+    const { name, date, parameter, template, questions } = req.body;
+    const { user } = req;
 
     const exam = new Exam({
       user: user._id,
@@ -11,107 +11,107 @@ class ExamController {
       date,
       parameter,
       template,
-      questions
-    })
+      questions,
+    });
 
     try {
-      await exam.save()
+      await exam.save();
 
-      await exam.populate("template", "name").execPopulate()
+      await exam.populate('template', 'name').execPopulate();
 
-      return res.status(201).send(exam)
+      return res.status(201).send(exam);
     } catch (err) {
-      console.log(err)
+      console.log(err);
       return res
         .status(err.status || 400)
-        .send({ error: "Não foi possível criar a prova" })
+        .send({ error: 'Não foi possível criar a prova' });
     }
   }
 
   async index(req, res) {
-    const { user } = req
+    const { user } = req;
     try {
-      const exams = await Exam.find({ user: user._id }).populate("tests")
+      const exams = await Exam.find({ user: user._id }).populate('tests');
 
-      return res.status(200).send(exams)
+      return res.status(200).send(exams);
     } catch (err) {
-      console.log(err)
+      console.log(err);
       return res
         .status(err.status || 400)
-        .send({ error: "Erro ao buscar as provas" })
+        .send({ error: 'Erro ao buscar as provas' });
     }
   }
 
   async show(req, res) {
-    const { id: _id } = req.params
-    const { user } = req
+    const { id: _id } = req.params;
+    const { user } = req;
 
     try {
-      const exam = await Exam.findOne({ _id, user: user._id })
+      const exam = await Exam.findOne({ _id, user: user._id });
 
       if (!exam) {
-        return res.status(404).send({ error: "Prova não encontrada" })
+        return res.status(404).send({ error: 'Prova não encontrada' });
       }
 
       await exam
-        .populate("template", "name")
-        .populate("tests")
-        .populate("questions.category")
-        .execPopulate()
+        .populate('template', 'name')
+        .populate('tests')
+        .populate('questions.category')
+        .execPopulate();
 
-      return res.status(200).send(exam)
+      return res.status(200).send(exam);
     } catch (err) {
-      console.log(err)
+      console.log(err);
       return res
         .status(err.status || 400)
-        .send({ error: "Erro ao buscar a prova" })
+        .send({ error: 'Erro ao buscar a prova' });
     }
   }
 
   async update(req, res) {
-    const { id: _id } = req.params
-    const updates = req.body
-    const { user } = req
+    const { id: _id } = req.params;
+    const updates = req.body;
+    const { user } = req;
 
     try {
-      const exam = await Exam.findOne({ _id, user: user._id })
+      const exam = await Exam.findOne({ _id, user: user._id });
 
       if (!exam) {
-        return res.status(404).send({ error: "Prova não encontrada" })
+        return res.status(404).send({ error: 'Prova não encontrada' });
       }
 
-      await exam.customUpdate(updates)
+      await exam.customUpdate(updates);
 
-      await exam.populate("tests").execPopulate()
+      await exam.populate('tests').execPopulate();
 
-      return res.status(200).send(exam)
+      return res.status(200).send(exam);
     } catch (err) {
-      console.log(err)
+      console.log(err);
       return res
         .status(err.status || 400)
-        .send({ error: "Erro ao editar a prova" })
+        .send({ error: 'Erro ao editar a prova' });
     }
   }
 
   async destroy(req, res) {
-    const { id: _id } = req.params
-    const { user } = req
+    const { id: _id } = req.params;
+    const { user } = req;
 
     try {
-      const exam = await Exam.findOneAndDelete({ _id, user: user._id })
+      const exam = await Exam.findOneAndDelete({ _id, user: user._id });
 
       if (!exam) {
-        return res.status(404).send({ error: "Prova não encontrada" })
+        return res.status(404).send({ error: 'Prova não encontrada' });
       }
 
-      return res.status(200).send()
+      return res.status(200).send();
     } catch (err) {
-      console.log(err)
+      console.log(err);
       return res
         .status(err.status || 400)
-        .send({ error: "Erro ao deletar a prova" })
+        .send({ error: 'Erro ao deletar a prova' });
     }
   }
 }
 
-module.exports = new ExamController()
+export default new ExamController();

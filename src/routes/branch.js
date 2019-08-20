@@ -1,15 +1,16 @@
-const express = require("express")
-const router = new express.Router()
-const BranchController = require("../app/controllers/BranchController")
+import express from 'express';
+import BranchController from '../app/controllers/BranchController';
 
-router.post("/branches", BranchController.store)
+const router = new express.Router();
 
-router.get("/branches", BranchController.index)
+router.post('/branches', BranchController.store);
 
-router.get("/branches/:id", BranchController.show)
+router.get('/branches', BranchController.index);
 
-router.put("/branches/:id", BranchController.update)
+router.get('/branches/:id', BranchController.show);
 
-router.delete("/branches/:id", BranchController.destroy)
+router.put('/branches/:id', BranchController.update);
 
-module.exports = router
+router.delete('/branches/:id', BranchController.destroy);
+
+export default router;

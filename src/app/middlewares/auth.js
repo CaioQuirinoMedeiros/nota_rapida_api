@@ -9,18 +9,17 @@ const auth = async (req, res, next) => {
 
     const decoded = await jwt.verify(token, authConfig.secret);
 
-    const user = await User.findOne({ _id: decoded.id, 'tokens.token': token });
+    const user = await User.findById(decoded.id);
 
     if (!user) {
       throw new Error();
     }
 
-    req.token = token;
     req.user = user;
 
     return next();
   } catch (err) {
-    return res.status(401).send({ error: 'Please authenticate' });
+    return res.status(401).send({ error: 'Autentique-se' });
   }
 };
 

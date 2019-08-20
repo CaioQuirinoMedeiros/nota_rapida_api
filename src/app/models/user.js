@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import validator from 'validator';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -18,31 +17,13 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
-      validate: value => {
-        if (!validator.isEmail(value)) {
-          throw new Error('Email is invalid');
-        }
-      },
     },
     password: {
       type: String,
       required: true,
-      minlength: 7,
+      minlength: 6,
       trim: true,
-      validate(value) {
-        if (value === 'password') {
-          throw new Error("Your password cannot be 'password'");
-        }
-      },
     },
-    tokens: [
-      {
-        token: {
-          type: String,
-          required: true,
-        },
-      },
-    ],
   },
   { toJSON: { virtuals: true }, timestamps: true }
 );
@@ -66,19 +47,17 @@ userSchema.virtual('exams', {
 });
 
 userSchema.pre('save', async function(next) {
-  if (this.isModified('password')) {
-    this.password = await bcrypt.hash(this.password, 8);
-  }
+  this.password = await bcrypt.hash(this.password, 8);
 
   return next();
 });
 
-userSchema.methods.checkPassword = function(password) {
-  return bcrypt.compare(password, this.password);
-};
-
 userSchema.statics.findByEmail = function(email) {
   return this.findOne({ email });
+};
+
+userSchema.methods.checkPassword = function(password) {
+  return bcrypt.compare(password, this.password);
 };
 
 userSchema.methods.generateJWT = async function() {
@@ -86,11 +65,22 @@ userSchema.methods.generateJWT = async function() {
     expiresIn: authConfig.expiresIn,
   });
 
-  this.tokens = this.tokens.concat({ token });
+  return token;
+};
+
+userSchema.methods.customUpdate = async function customUpdate(updates) {
+  const updatesKeys = Object.keys(updates);
+  const allowedUpdates = ['name', 'email', 'password'];
+
+  allowedUpdates.forEach(update => {
+    if (updatesKeys.includes(update)) {
+      this[update] = updates[update];
+    }
+  });
 
   await this.save();
 
-  return token;
+  return this;
 };
 
 userSchema.methods.toJSON = function toJSON() {

@@ -1,3 +1,5 @@
+import User from '../models/User';
+
 class UserController {
   async show(req, res) {
     const { user } = req;
@@ -6,28 +8,36 @@ class UserController {
   }
 
   async update(req, res) {
+    const { email, password, oldPassword } = req.body;
     const { user } = req;
 
-    const updates = Object.keys(req.body);
-    const allowedUpdates = ['name', 'email', 'password'];
-    const isUpdatesValid = updates.every(update =>
-      allowedUpdates.includes(update)
-    );
-
-    if (!isUpdatesValid) {
-      return res.status(400).send({ error: 'Invalid user inputs' });
-    }
-
     try {
-      updates.forEach(update => {
-        user[update] = req.body[update];
-      });
+      if (email && email !== user.email) {
+        const userExists = await User.findByEmail(email);
 
-      await user.save();
+        if (userExists) {
+          return res.status(400).send({ error: 'Usuário já existe' });
+        }
+      }
+
+      if (password) {
+        if (!oldPassword) {
+          return res.status(401).send({ error: 'Forneça sua senha atual' });
+        }
+
+        const passwordMatch = await user.checkPassword(oldPassword);
+
+        if (!passwordMatch) {
+          return res.status(401).send({ error: 'Senha incorreta' });
+        }
+      }
+
+      await user.customUpdate(req.body);
 
       return res.status(200).send(user);
     } catch (err) {
-      return res.status(400).send({ error: "Couldn't update the user" });
+      console.log(err);
+      return res.status(400).send({ error: 'Erro ao editar usuário' });
     }
   }
 
@@ -39,7 +49,7 @@ class UserController {
 
       return res.status(200).send(user);
     } catch (err) {
-      return res.status(500).send({ error: "Couldn't delete user" });
+      return res.status(500).send({ error: 'Erro ao deletar usuário' });
     }
   }
 }

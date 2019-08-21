@@ -1,4 +1,5 @@
 import express from 'express';
+
 import TeamController from '../app/controllers/TeamController';
 import auth from '../app/middlewares/auth';
 

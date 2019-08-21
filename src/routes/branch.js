@@ -1,4 +1,5 @@
 import express from 'express';
+
 import BranchController from '../app/controllers/BranchController';
 
 const router = new express.Router();

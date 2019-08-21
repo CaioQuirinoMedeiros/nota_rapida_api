@@ -1,4 +1,5 @@
 import express from 'express';
+
 import TestController from '../app/controllers/TestController';
 import auth from '../app/middlewares/auth';
 

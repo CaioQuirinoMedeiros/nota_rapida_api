@@ -1,4 +1,5 @@
 import express from 'express';
+
 import TemplateController from '../app/controllers/TemplateController';
 import auth from '../app/middlewares/auth';
 

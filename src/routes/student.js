@@ -1,4 +1,5 @@
 import express from 'express';
+
 import StudentController from '../app/controllers/StudentController';
 
 import validateStudentStore from '../app/validators/StudentStore';

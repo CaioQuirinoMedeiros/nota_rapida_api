@@ -3,50 +3,38 @@ import Template from '../models/Template';
 class TemplateController {
   async store(req, res) {
     const { name, sections, categories, subjects, languages } = req.body;
-    const { user } = req;
-
-    const template = new Template({
-      user: user._id,
-      name,
-      categories,
-      sections,
-      subjects,
-      languages,
-    });
 
     try {
-      await template.save();
+      const template = await Template.create({
+        user: req.user,
+        name,
+        categories,
+        sections,
+        subjects,
+        languages,
+      });
 
       return res.status(201).send(template);
     } catch (err) {
-      console.log(err);
-      return res
-        .status(err.status || 400)
-        .send({ error: 'Não foi possível criar o modelol' });
+      return res.status(400).send({ error: 'Erro ao criar o modelo' });
     }
   }
 
   async index(req, res) {
-    const { user } = req;
-
     try {
-      const templates = await Template.find({ user: user._id });
+      const templates = await Template.find({ user: req.user });
 
       return res.status(200).send(templates);
     } catch (err) {
-      console.log(err);
-      return res
-        .status(err.status || 400)
-        .send({ error: 'Erro ao buscar os modelos' });
+      return res.status(400).send({ error: 'Erro ao buscar os modelos' });
     }
   }
 
   async show(req, res) {
     const { id: _id } = req.params;
-    const { user } = req;
 
     try {
-      const template = await Template.findOne({ _id, user: user._id });
+      const template = await Template.findOne({ _id, user: req.user });
 
       if (!template) {
         return res.status(404).send({ error: 'Modelo não encontrado' });
@@ -54,42 +42,34 @@ class TemplateController {
 
       return res.status(200).send(template);
     } catch (err) {
-      console.log(err);
-      return res
-        .status(err.status || 400)
-        .send({ error: 'Erro ao buscar os modelos' });
+      return res.status(400).send({ error: 'Erro ao buscar o modelo' });
     }
   }
 
   async update(req, res) {
     const { id: _id } = req.params;
-    const updates = req.body;
-    const { user } = req;
 
     try {
-      const template = await Template.findOne({ _id, user: user._id });
+      const template = await Template.findOne({ _id, user: req.user });
 
       if (!template) {
         return res.status(404).send({ error: 'Modelo não encontrado' });
       }
 
-      await template.customUpdate(updates);
+      await template.customUpdate(req.body);
 
       return res.status(200).send(template);
     } catch (err) {
       console.log(err);
-      return res
-        .status(err.status || 400)
-        .send({ error: 'Não foi possível editar o modelo' });
+      return res.status(400).send({ error: 'Erro ao editar o modelo' });
     }
   }
 
   async destroy(req, res) {
     const { id: _id } = req.params;
-    const { user } = req;
 
     try {
-      const template = await Template.findOneAndDelete({ _id, user: user._id });
+      const template = await Template.findOneAndDelete({ _id, user: req.user });
 
       if (!template) {
         return res.status(404).send({ error: 'Modelo não encontrado' });
@@ -97,10 +77,7 @@ class TemplateController {
 
       return res.status(200).send();
     } catch (err) {
-      console.log(err);
-      return res
-        .status(err.status || 400)
-        .send({ error: 'Não foi possível deletar o modelo' });
+      return res.status(400).send({ error: 'Erro ao deletar o modelo' });
     }
   }
 }

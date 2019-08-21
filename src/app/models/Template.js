@@ -1,39 +1,46 @@
 const mongoose = require('mongoose');
 const idvalidator = require('mongoose-id-validator');
+const autopopulate = require('mongoose-autopopulate');
 
-const categorySchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
+const categorySchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    correct: {
+      type: Number,
+      required: true,
+    },
+    incorrect: {
+      type: Number,
+      required: true,
+    },
   },
-  correct: {
-    type: Number,
-    required: true,
-  },
-  incorrect: {
-    type: Number,
-    required: true,
-  },
-});
+  { versionKey: false }
+);
 
-const templateSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
+const templateSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+    },
+    categories: [{ type: categorySchema, autopopulate: true }],
+    sections: { type: [String], default: undefined },
+    subjects: { type: [String], default: undefined },
+    languages: { type: [String], default: undefined },
   },
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-  },
-  categories: [categorySchema],
-  sections: { type: [String], default: undefined },
-  subjects: { type: [String], default: undefined },
-  languages: { type: [String], default: undefined },
-});
+  { versionKey: false }
+);
 
-templateSchema.methods.customUpdate = async function customUpdate(updates) {
+templateSchema.methods.customUpdate = async function(updates) {
   const updatesKeys = Object.keys(updates);
   const allowedUpdates = [
     'name',
@@ -42,16 +49,11 @@ templateSchema.methods.customUpdate = async function customUpdate(updates) {
     'languages',
     'subjects',
   ];
-  const isUpdatesValid = updatesKeys.every(update =>
-    allowedUpdates.includes(update)
-  );
 
-  if (!isUpdatesValid) {
-    throw new Error('Parâmetros incorretos para editar o aluno');
-  }
-
-  updatesKeys.forEach(update => {
-    this[update] = updates[update];
+  allowedUpdates.forEach(update => {
+    if (updatesKeys.includes(update)) {
+      this[update] = updates[update];
+    }
   });
 
   await this.save();
@@ -60,6 +62,7 @@ templateSchema.methods.customUpdate = async function customUpdate(updates) {
 };
 
 templateSchema.plugin(idvalidator);
+templateSchema.plugin(autopopulate);
 
 const Template = mongoose.model('Template', templateSchema);
 

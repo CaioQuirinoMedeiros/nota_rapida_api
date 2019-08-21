@@ -1,5 +1,6 @@
-const mongoose = require('mongoose');
-const idvalidator = require('mongoose-id-validator');
+/* eslint-disable no-use-before-define */
+import mongoose from 'mongoose';
+import idvalidator from 'mongoose-id-validator';
 
 const studentSchema = new mongoose.Schema(
   {
@@ -45,19 +46,26 @@ studentSchema.virtual('numTests', {
   count: true,
 });
 
+studentSchema.path('registration').validate(async function(value) {
+  console.log('THIS: ', this);
+  console.log('value: ', value);
+
+  const studentExists = await Student.findOne({
+    registration: value,
+    team: this.team,
+  });
+
+  return !studentExists;
+});
+
 studentSchema.methods.customUpdate = async function customUpdate(updates) {
   const updatesKeys = Object.keys(updates);
   const allowedUpdates = ['name', 'registration', 'team'];
-  const isUpdatesValid = updatesKeys.every(update =>
-    allowedUpdates.includes(update)
-  );
 
-  if (!isUpdatesValid) {
-    throw new Error('Parâmetros incorretos para editar o aluno');
-  }
-
-  updatesKeys.forEach(update => {
-    this[update] = updates[update];
+  allowedUpdates.forEach(update => {
+    if (updatesKeys.includes(update)) {
+      this[update] = updates[update];
+    }
   });
 
   await this.save();
@@ -65,24 +73,11 @@ studentSchema.methods.customUpdate = async function customUpdate(updates) {
   return this;
 };
 
-studentSchema.methods.getBranch = async function getBranch() {
+studentSchema.methods.getBranch = async function() {
   await this.populate({ path: 'team', populate: 'branch' }).execPopulate();
 
   return this.team.branch;
 };
-
-studentSchema.methods.updateUniqueRegistration = async function updateUniqueRegistration() {
-  const branch = await this.getBranch();
-
-  this.unique_registration = `${branch.id}.${this.registration}`;
-
-  return this;
-};
-
-studentSchema.pre('save', async function preSave(next) {
-  await this.updateUniqueRegistration();
-  return next();
-});
 
 studentSchema.plugin(idvalidator);
 

@@ -3,7 +3,7 @@ import * as Yup from 'yup';
 export default async (req, res, next) => {
   try {
     const schema = Yup.object().shape({
-      name: Yup.string().required('O nome do modelo é obrigatório'),
+      name: Yup.string(),
       categories: Yup.array(
         Yup.object()
           .shape({
@@ -18,9 +18,7 @@ export default async (req, res, next) => {
               .required('Forneça o peso do erro do tipo de questão'),
           })
           .typeError('O tipo de questão deve ser um objeto')
-      )
-        .typeError('Os tipos de questões deve ser um array')
-        .required('Forneça tipos de questão'),
+      ).typeError('Os tipos de questões deve ser um array'),
       sections: Yup.array(Yup.string('A seção deve ser um texto')).typeError(
         'As seções deve ser um array'
       ),

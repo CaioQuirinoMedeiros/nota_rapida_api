@@ -53,7 +53,11 @@ studentSchema.path('registration').validate(async function(value) {
     team: this.team,
   });
 
-  return !studentExists;
+  if (studentExists) {
+    return studentExists.id === this.id;
+  }
+
+  return false;
 });
 
 studentSchema.methods.customUpdate = async function customUpdate(updates) {

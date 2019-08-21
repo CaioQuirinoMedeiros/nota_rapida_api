@@ -1,53 +1,57 @@
 import Exam from '../models/Exam';
+import Template from '../models/Template';
 
 class ExamController {
   async store(req, res) {
     const { name, date, parameter, template, questions } = req.body;
-    const { user } = req;
-
-    const exam = new Exam({
-      user: user._id,
-      name,
-      date,
-      parameter,
-      template,
-      questions,
-    });
 
     try {
-      await exam.save();
+      const templateExists = await Template.findOne({
+        _id: template,
+        user: req.user,
+      });
 
-      await exam.populate('template', 'name').execPopulate();
+      if (!templateExists) {
+        return res.status(404).send({ error: 'Modelo não encontrado' });
+      }
+
+      const exam = await Exam.create({
+        user: req.user,
+        name,
+        date,
+        parameter,
+        template,
+        questions,
+      });
+
+      await exam
+        .populate('template', 'name')
+        .populate('user', 'name')
+        .execPopulate();
 
       return res.status(201).send(exam);
     } catch (err) {
-      console.log(err);
-      return res
-        .status(err.status || 400)
-        .send({ error: 'Não foi possível criar a prova' });
+      return res.status(400).send({ error: 'Erro ao criar a prova' });
     }
   }
 
   async index(req, res) {
-    const { user } = req;
     try {
-      const exams = await Exam.find({ user: user._id }).populate('tests');
+      const exams = await Exam.find({ user: req.user }).populate('numTests');
 
       return res.status(200).send(exams);
     } catch (err) {
-      console.log(err);
-      return res
-        .status(err.status || 400)
-        .send({ error: 'Erro ao buscar as provas' });
+      return res.status(400).send({ error: 'Erro ao buscar as provas' });
     }
   }
 
   async show(req, res) {
     const { id: _id } = req.params;
-    const { user } = req;
 
     try {
-      const exam = await Exam.findOne({ _id, user: user._id });
+      const exam = await Exam.findOne({ _id, user: req.user }).populate(
+        'tests'
+      );
 
       if (!exam) {
         return res.status(404).send({ error: 'Prova não encontrada' });
@@ -56,49 +60,39 @@ class ExamController {
       await exam
         .populate('template', 'name')
         .populate('tests')
-        .populate('questions.category')
         .execPopulate();
 
       return res.status(200).send(exam);
     } catch (err) {
-      console.log(err);
-      return res
-        .status(err.status || 400)
-        .send({ error: 'Erro ao buscar a prova' });
+      return res.status(400).send({ error: 'Erro ao buscar a prova' });
     }
   }
 
   async update(req, res) {
     const { id: _id } = req.params;
-    const updates = req.body;
-    const { user } = req;
 
     try {
-      const exam = await Exam.findOne({ _id, user: user._id });
+      const exam = await Exam.findOne({ _id, user: req.user });
 
       if (!exam) {
         return res.status(404).send({ error: 'Prova não encontrada' });
       }
 
-      await exam.customUpdate(updates);
+      await exam.customUpdate(req.body);
 
       await exam.populate('tests').execPopulate();
 
       return res.status(200).send(exam);
     } catch (err) {
-      console.log(err);
-      return res
-        .status(err.status || 400)
-        .send({ error: 'Erro ao editar a prova' });
+      return res.status(400).send({ error: 'Erro ao editar a prova' });
     }
   }
 
   async destroy(req, res) {
     const { id: _id } = req.params;
-    const { user } = req;
 
     try {
-      const exam = await Exam.findOneAndDelete({ _id, user: user._id });
+      const exam = await Exam.findOneAndDelete({ _id, user: req.user });
 
       if (!exam) {
         return res.status(404).send({ error: 'Prova não encontrada' });
@@ -106,10 +100,7 @@ class ExamController {
 
       return res.status(200).send();
     } catch (err) {
-      console.log(err);
-      return res
-        .status(err.status || 400)
-        .send({ error: 'Erro ao deletar a prova' });
+      return res.status(400).send({ error: 'Erro ao deletar a prova' });
     }
   }
 }

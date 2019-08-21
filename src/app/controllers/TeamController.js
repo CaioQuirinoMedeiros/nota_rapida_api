@@ -8,7 +8,7 @@ class TeamController {
     try {
       const branchExists = await Branch.findOne({
         _id: branch,
-        user: req.user._id,
+        user: req.user,
       });
 
       if (!branchExists) {
@@ -18,7 +18,7 @@ class TeamController {
       const team = await Team.create({
         name,
         branch,
-        user: req.user._id,
+        user: req.user,
       });
 
       return res.status(201).send(team);
@@ -31,7 +31,7 @@ class TeamController {
     const { name, branch_id } = req.query;
 
     try {
-      const query = Team.find({ user: req.user._id });
+      const query = Team.find({ user: req.user });
 
       if (branch_id) {
         query.find({ branch: branch_id });
@@ -53,7 +53,7 @@ class TeamController {
     const { id: _id } = req.params;
 
     try {
-      const team = await Team.findOne({ _id, user: req.user._id })
+      const team = await Team.findOne({ _id, user: req.user })
         .populate('students', 'name registration')
         .populate('numStudents');
 
@@ -72,19 +72,21 @@ class TeamController {
     const { branch } = req.body;
 
     try {
-      const team = await Team.findOne({ _id, user: req.user._id });
+      const team = await Team.findOne({ _id, user: req.user });
 
       if (!team) {
         return res.status(404).send({ error: 'Turma não encontrada' });
       }
 
-      const branchExists = await Branch.findOne({
-        _id: branch,
-        user: req.user._id,
-      });
+      if (branch) {
+        const branchExists = await Branch.findOne({
+          _id: branch,
+          user: req.user,
+        });
 
-      if (!branchExists) {
-        return res.status(404).send({ error: 'Unidade não encontrada' });
+        if (!branchExists) {
+          return res.status(404).send({ error: 'Unidade não encontrada' });
+        }
       }
 
       await team.customUpdate(req.body);

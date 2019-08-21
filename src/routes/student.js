@@ -1,9 +1,11 @@
 import express from 'express';
 import StudentController from '../app/controllers/StudentController';
 
+import validateStudentStore from '../app/validators/StudentStore';
+
 const router = new express.Router();
 
-router.post('/students', StudentController.store);
+router.post('/students', validateStudentStore, StudentController.store);
 
 router.get('/students', StudentController.index);
 

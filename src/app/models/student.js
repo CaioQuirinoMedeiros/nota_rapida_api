@@ -1,6 +1,8 @@
 /* eslint-disable no-use-before-define */
 import mongoose from 'mongoose';
 import idvalidator from 'mongoose-id-validator';
+import Branch from './Branch';
+import Team from './Team';
 
 const studentSchema = new mongoose.Schema(
   {
@@ -48,16 +50,19 @@ studentSchema.virtual('numTests', {
 });
 
 studentSchema.path('registration').validate(async function(value) {
+  const team = await Team.findById(this.team);
+  const branch = await Branch.findById(team.branch).populate('teams');
+
   const studentExists = await Student.findOne({
     registration: value,
-    team: this.team,
+    team: { $in: branch.teams },
   });
 
   if (studentExists) {
     return studentExists.id === this.id;
   }
 
-  return false;
+  return true;
 });
 
 studentSchema.methods.customUpdate = async function customUpdate(updates) {

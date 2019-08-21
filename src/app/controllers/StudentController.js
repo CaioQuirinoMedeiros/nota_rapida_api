@@ -1,5 +1,6 @@
 import Student from '../models/Student';
 import Team from '../models/Team';
+import Branch from '../models/Branch';
 
 class StudentController {
   async store(req, res) {
@@ -13,6 +14,18 @@ class StudentController {
         return res.status(404).send({ error: 'Turma não encontrada' });
       }
 
+      const branch = await Branch.findById(teamExists.branch).populate('teams');
+
+      const registrationExists = await Student.findOne({
+        user: req.user,
+        registration,
+        team: { $in: branch.teams },
+      });
+
+      if (registrationExists) {
+        return res.status(400).send({ error: 'Matrícula já está sendo usada' });
+      }
+
       const student = await Student.create({
         name,
         registration,
@@ -22,6 +35,7 @@ class StudentController {
 
       return res.status(201).send(student);
     } catch (err) {
+      console.log(err);
       return res.status(400).send({ error: 'Não foi possível criar o aluno' });
     }
   }

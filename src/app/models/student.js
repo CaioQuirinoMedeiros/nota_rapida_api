@@ -48,9 +48,6 @@ studentSchema.virtual('numTests', {
 });
 
 studentSchema.path('registration').validate(async function(value) {
-  console.log('THIS: ', this);
-  console.log('value: ', value);
-
   const studentExists = await Student.findOne({
     registration: value,
     team: this.team,

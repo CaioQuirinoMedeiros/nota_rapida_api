@@ -12,6 +12,7 @@ import studentRouter from './routes/student';
 import templateRouter from './routes/template';
 import examRouter from './routes/exam';
 import testRouter from './routes/test';
+import filesRouter from './routes/files';
 
 import './database';
 
@@ -38,6 +39,7 @@ class App {
     this.server.use(templateRouter);
     this.server.use(examRouter);
     this.server.use(testRouter);
+    this.server.use(filesRouter);
   }
 
   exceptionHandler() {
